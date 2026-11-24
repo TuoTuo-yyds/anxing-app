@@ -1402,3 +1402,31 @@ html[data-scheme="light"] .nav-recenter{background:rgba(255,255,255,.92);color:#
   pointer-events:none}
 .gm-arrow.below{transform:translate(-50%,0)}
 html[data-scheme="light"] .guide-why{background:rgba(31,143,131,.08);color:#0d8f76}
+
+
+/* =========================================================
+   实时定位状态条：常驻可见，明确反馈定位结果，失败可一键重试
+   ========================================================= */
+.loc-status{position:absolute;left:var(--safe);right:var(--safe);
+  top:calc(176px + env(safe-area-inset-top,0px));z-index:30;
+  display:flex;align-items:center;gap:8px;width:auto;max-width:calc(100% - 96px);
+  padding:8px 11px;border-radius:13px;text-align:left;cursor:pointer;
+  background:linear-gradient(135deg,rgba(16,34,44,.94),rgba(9,18,28,.92));
+  border:1px solid rgba(127,240,212,.34);backdrop-filter:blur(14px);
+  box-shadow:0 8px 24px rgba(0,0,0,.34);color:#eef6fb}
+.loc-status .loc-dot{width:8px;height:8px;border-radius:50%;flex:none;
+  background:var(--mint);box-shadow:0 0 9px var(--mint)}
+.loc-status.locating .loc-dot{background:var(--amber);box-shadow:0 0 9px var(--amber);
+  animation:locBlink 1.1s ease-in-out infinite}
+.loc-status.fail .loc-dot{background:var(--coral);box-shadow:0 0 9px var(--coral)}
+@keyframes locBlink{0%,100%{opacity:1}50%{opacity:.35}}
+.loc-status .loc-text{flex:1;min-width:0;font-size:10px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.loc-status .loc-retry{flex:none;font-size:9px;font-weight:800;color:var(--mint);
+  padding-left:8px;border-left:1px solid var(--line)}
+.loc-status.fail .loc-retry{color:var(--amber)}
+.loc-status.ok{border-color:rgba(127,240,212,.22)}
+.loc-status:active{transform:scale(.985)}
+html[data-scheme="light"] .loc-status{background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(240,246,252,.94));
+  border-color:rgba(31,143,131,.35);color:var(--text)}
+[data-screen="home"].state-nav .loc-status{opacity:0;pointer-events:none;transition:.25s}

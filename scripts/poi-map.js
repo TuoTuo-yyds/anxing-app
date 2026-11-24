@@ -343,7 +343,6 @@
   function guide() {
     /* 「我的 → 使用指南」是显式入口，任何时候都必须能打开，
        不受"已看过/已关闭"状态影响；打开时收起底部提示栏避免重叠。 */
-    XA.guideDismissed = false;
     XA.guideShown = true;
     var hint = XA.$('#guideHint'); if (hint) hint.remove();
     var phone = XA.$('#phone'); if (!phone) return;
@@ -375,7 +374,8 @@
     clearGuideHl();
     if (XA._guideResize) { window.removeEventListener('resize', XA._guideResize); XA._guideResize = null; }
     var l = XA.$('#guideLayer'); if (l) l.remove();
-    if (XA.markGuideSeen) XA.markGuideSeen();   // 完成后持久化，刷新不再打扰
+    if (XA.markGuideSeen) XA.markGuideSeen();          // 记录已看过（不关闭入口）
+    if (XA.showGuideHint) setTimeout(XA.showGuideHint, 260);  // 引导条仍常驻，随时可再打开
   }
 
   /* 实时定位由 legacy.js 统一发布；poi-map 只订阅，避免多个 watcher 抢定位 */

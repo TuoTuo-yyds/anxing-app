@@ -409,8 +409,8 @@
   }
   /* 用户控制 + 易学性：引导改为非阻断提示，由用户点「查看」才进入；
      不再强制弹层、不再在进入功能页时自动打断用户 */
-  /* 引导版本标记：内容更新后换一个 key，老用户也会看到一次新版提示。
-     用 localStorage 持久化，避免每次刷新都打扰，但不再依赖「刚登录」这一瞬间。 */
+  /* 引导是常驻入口：只记录"看过"，不据此隐藏提示栏；
+     不再依赖「刚登录」那一瞬间，也不因点过其它按钮而永久消失。 */
   var GUIDE_KEY = 'xa_guide_v3';
   XA.guidePending = false;
   XA.guideShown = false;
@@ -418,12 +418,19 @@
   function guideSeen() { try { return localStorage.getItem(GUIDE_KEY) === '1'; } catch (e) { return false; } }
   function markGuideSeen() {
     try { localStorage.setItem(GUIDE_KEY, '1'); } catch (e) {}
-    XA.guidePending = false; XA.guideShown = false; XA.guideDismissed = true;
   }
   XA.markGuideSeen = markGuideSeen;
-  function hideGuideHint() { var h = XA.$('#guideHint'); if (h) h.remove(); }
+  XA.showGuideHint = function () { XA.guideShown = false; showGuideHint(); };
+  /* 临时收起（例如切到别的标签页）时复位 guideShown，回到首页还能再出现；
+     只有用户明确点「关闭」才在本次会话内不再出现。 */
+  function hideGuideHint() {
+    var h = XA.$('#guideHint'); if (h) h.remove();
+    if (!XA.guideDismissed) { XA.guideShown = false; XA.guidePending = true; }
+  }
   function showGuideHint() {
-    if (XA.$('#guideHint') || XA.guideDismissed || guideSeen()) return;
+    /* 使用引导是常驻入口：只要用户没在本次会话里明确点「关闭」，就一直可见。
+       不再因为"看完一次"或点过其它按钮就永久消失。 */
+    if (XA.$('#guideHint') || XA.guideDismissed) return;
     var phone = XA.$('#phone'); if (!phone) return;
     var hint = document.createElement('div');
     hint.className = 'guide-hint';
@@ -445,16 +452,15 @@
     showGuideHint();
   };
   XA.actions['dismiss-guide-hint'] = function () {
+    XA.guideDismissed = true;    // 仅本次会话关闭
     hideGuideHint();
-    markGuideSeen();
     XA.toast('已关闭引导提示 · 可在「我的 → 使用指南」随时查看', 'info');
   };
   /* 启动时独立安排引导提示，不再依赖登录/跳过登录那一次回调 */
   function scheduleGuideHint() {
-    if (guideSeen()) return;
     XA.guidePending = true;
     var tryShow = function () {
-      if (guideSeen() || XA.guideShown) return;
+      if (XA.guideDismissed) return;
       var login = XA.$('#loginScreen');
       if (login && login.classList.contains('open')) { setTimeout(tryShow, 900); return; }
       XA.maybeStartGuide();
@@ -674,11 +680,14 @@
     if (XA.onPositionChange) XA.onPositionChange(XA.position);
     if (XA.refreshGeoState) XA.refreshGeoState();
     updatePosition(lat, lng, acc);
-    /* 配置 Key 后，用官方逆地理编码把经纬度翻译成真实街道地址 */
+    if (real && XA.setLocState) XA.setLocState('ok', acc, '');
+    /* 配置 Key 后，用官方逆地理编码把经纬度翻译成真实街道地址，并回写状态条 */
     if (real && XA.Geo && XA.Geo.hasKey()) {
       XA.Geo.regeo(lat, lng).then(function (r) {
         XA.position.address = r.formatted || '';
-        XA.position.city = r.city || '';
+        var city = Array.isArray(r.city) ? (r.city[0] || '') : (r.city || '');
+        XA.position.city = city || r.province || '';
+        if (XA.setLocState) XA.setLocState('ok', XA.position.acc, XA.position.city || '');
         if (XA.onPositionChange) XA.onPositionChange(XA.position);
       }).catch(function () {});
     }
@@ -701,20 +710,57 @@
     }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 });
   };
   /* 主动申请位置权限：用户同意后获取真实位置并持续跟随 */
+  /* 定位状态条：常驻可见，明确区分「定位中 / 已定位 / 未开启」，失败可一键重试 */
+  XA.setLocState = function (state, acc, msg) {
+    var bar = XA.$('#locStatus'), txt = XA.$('#locText'), retry = XA.$('#locRetry');
+    if (!bar) return;
+    bar.className = 'loc-status ' + state;
+    if (state === 'ok') {
+      txt.textContent = '实时定位 · 精度 ±' + Math.round(acc || 0) + ' m' + (msg ? ' · ' + msg : '');
+      retry.style.display = 'none';
+    } else if (state === 'locating') {
+      txt.textContent = msg || '正在获取你的实时位置…';
+      retry.style.display = 'none';
+    } else {
+      txt.textContent = msg || '定位未开启 · 点此重新获取';
+      retry.style.display = '';
+    }
+  };
+  function locSuccess(p, silent) {
+    publishPosition(p.coords.latitude, p.coords.longitude, p.coords.accuracy, true);
+    XA.setLocState('ok', p.coords.accuracy, (XA.position && XA.position.city) || '');
+    startHomeWatch();
+    if (!silent) XA.toast('已回到你的实时位置 · 精度 ±' + Math.round(p.coords.accuracy || 0) + ' m', 'success');
+  }
+  function locFail(e, silent) {
+    var m = e && e.code === 1 ? '定位权限被拒绝 · 请在浏览器设置允许位置访问'
+          : e && e.code === 2 ? '信号不足 · 请开启系统定位或到室外'
+          : '定位超时 · 可点此重试';
+    XA.setLocState('fail', 0, m);
+    if (!silent) XA.toast(m, 'warn');
+  }
+  /* 两阶段定位：先要高精度 GNSS(GPS/北斗)，超时自动回落到快速网络定位；
+     手机冷启动 GPS 常需 10s 以上，单阶段 8 秒超时会直接失败并停在演示起点。 */
   XA.startLiveLocation = function (silent) {
-    if (!navigator.geolocation) { if (!silent) XA.toast('设备不支持定位 · 保持演示位置'); return; }
+    if (!navigator.geolocation) { XA.setLocState('fail', 0, '本设备不支持定位'); return; }
     if (homeWatch !== null) { if (!silent) XA.toast('实时定位已开启 · 蓝色箭头正跟随你'); return; }
+    XA.setLocState('locating', 0, '正在获取你的实时位置…');
     navigator.geolocation.getCurrentPosition(function (p) {
-      publishPosition(p.coords.latitude, p.coords.longitude, p.coords.accuracy, true);
-      startHomeWatch();
-      if (!silent) XA.toast('已开启实时定位 · 蓝色箭头将跟随你移动');
-      else XA.toast('实时定位已就绪 · 精度 ±' + Math.round(p.coords.accuracy || 0) + ' m', 'success');
+      locSuccess(p, silent);
     }, function (e) {
-      var m = e && e.code === 1 ? '定位权限被拒绝 · 请在浏览器 / 系统设置中允许位置访问'
-            : e && e.code === 2 ? '暂时无法获取位置 · 请开启定位服务或到室外'
-            : '定位超时 · 可点「回到我的位置」重试';
-      XA.toast(m, 'warn');
-    }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 });
+      /* 高精度失败再给一次低精度机会；权限被拒(code 1)则不重试，避免反复弹窗 */
+      if (e && e.code === 1) { locFail(e, silent); return; }
+      navigator.geolocation.getCurrentPosition(function (p) {
+        locSuccess(p, silent);
+      }, function (e2) { locFail(e2, silent); },
+        { enableHighAccuracy: false, maximumAge: 60000, timeout: 12000 });
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 18000 });
+  };
+  /* 用户主动点状态条：清掉旧 watch 后强制重新定位 */
+  XA.actions['locate-me'] = function () {
+    if (homeWatch !== null) { try { navigator.geolocation.clearWatch(homeWatch); } catch (e) {} homeWatch = null; }
+    XA.toast('正在重新获取实时位置…');
+    XA.startLiveLocation(false);
   };
   function startHomeWatch() {
     if (!navigator.geolocation || homeWatch !== null) return;
@@ -1305,7 +1351,10 @@
   var origGo = XA.go;
   XA.go = function (screen, noHistory) {
     origGo(screen, noHistory);
-    if (screen !== 'home') hideGuideHint();   // 离开首页即收起引导提示，不打断导航或其它功能
+    if (screen !== 'home') hideGuideHint();   // 离开首页临时收起，不打断导航或其它功能
+    else if (!XA.guideDismissed && !XA.$('#guideHint') && XA.maybeStartGuide) {
+      XA.guidePending = true; XA.guideShown = false; XA.maybeStartGuide();   // 回到首页自动重新出现
+    }
     // 登录完成后，首次进入功能页面立即弹出新手引导（登录层仍打开时不弹）
     if (XA.guidePending && screen !== 'sos' && XA.maybeStartGuide) {
       var pendingScreen = screen;
@@ -1433,9 +1482,8 @@
   var profileCard = XA.$('[data-screen="profile"] .profile-card');
   if (profileCard) profileCard.addEventListener('click', function () { XA.actions['open-login'](); });
   document.addEventListener('click', function (e) {
-    /* 用户一旦开始其它操作就收起引导提示，不覆盖弹窗、不打断当前任务 */
-    var act = e.target.closest && e.target.closest('[data-action]');
-    if (act && act.dataset.action !== 'dismiss-guide-hint') hideGuideHint();
+    /* 提示栏是非阻断的：只有用户点「关闭」或「查看」时才收起，
+       其它任何操作都不再把它移除，避免用户还没看到就消失。 */
     var ap = e.target.closest('[data-appearance]');
     if (ap) {
       XA.settings.appearance = ap.dataset.appearance; saveSettings(); applyAppearance(); openSettings();

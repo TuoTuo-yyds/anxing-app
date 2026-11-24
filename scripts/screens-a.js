@@ -11,6 +11,14 @@ XA_SCREENS.home = `
     <button id="homeSearchBtn" class="home-search-btn" data-action="do-search">搜索</button>
   </div>
   <div class="poi-suggest" id="poiSuggest" aria-label="附近地点联想推荐"></div>
+
+  <!-- 3.0 · 可见性 / 反馈：定位状态常驻可见，失败可一键重试，不再靠一闪而过的提示 -->
+  <button class="loc-status" id="locStatus" data-action="locate-me" role="status" aria-label="查看或重试实时定位">
+    <span class="loc-dot"></span>
+    <span class="loc-text" id="locText">正在获取你的实时位置…</span>
+    <span class="loc-retry" id="locRetry">重试</span>
+  </button>
+
   <div class="home-floats">
     <button class="float-btn" data-action="risk-popover" aria-label="查看风险点位与提示 · 再点隐藏">${ic('warning')}</button>
     <button class="float-btn" data-action="recenter" aria-label="回到我的位置">${ic('pin')}</button>
