@@ -1326,3 +1326,79 @@ html[data-scheme="light"] .lv-sos{background:rgba(226,64,58,.06)}
 /* 浅色主题：变量自动适配，仅把分隔线略减弱 */
 html[data-scheme="light"] .poi-facts,
 html[data-scheme="light"] .poi-fact + .poi-fact{border-color:rgba(11,22,36,.13)}
+
+
+/* =========================================================
+   导航地图：真实 Leaflet 路线 / 终点图层
+   ========================================================= */
+/* base.css 里原来那条过宽的 `.nav-map svg{inset:0;width:100%;height:100%}`
+   已删除：它会命中 Leaflet overlayPane 的 <svg> 并破坏折线定位。
+   旧的装饰元素即使被其它版本残留，也一律隐藏。 */
+.nav-map .nv-road,.nav-map .nv-route,.nav-map .nv-user{display:none!important}
+/* 路线图层 pane 由 JS 设为 z-index 450：高于瓦片与遮罩，低于 HUD 面板 */
+.nav-map .leaflet-pane.leaflet-xaRoute-pane{z-index:450;pointer-events:none}
+/* 终点：真实地理图层，随缩放/拖动同步移动 */
+.xa-dest-wrap{background:none;border:0;pointer-events:none}
+.xa-dest-pin{position:relative;width:22px;height:30px}
+.xa-dest-pin::before{content:"";position:absolute;left:2px;top:0;width:18px;height:18px;border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg);background:linear-gradient(135deg,var(--amber),#ff8a4c);
+  border:2px solid #fff;box-shadow:0 3px 12px rgba(0,0,0,.55),0 0 14px rgba(255,196,107,.65)}
+.xa-dest-pin span{position:absolute;left:8px;top:5px;width:6px;height:6px;border-radius:50%;background:#10202c;z-index:2}
+.xa-dest-label{position:absolute;left:50%;transform:translateX(-50%);top:32px;white-space:nowrap;
+  max-width:180px;overflow:hidden;text-overflow:ellipsis;padding:3px 9px;border-radius:9px;
+  background:rgba(8,16,26,.9);border:1px solid rgba(255,196,107,.45);color:#ffe3b8;
+  font-size:9px;font-weight:700;letter-spacing:.01em;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+/* 回到完整路线按钮 */
+.nav-recenter{position:absolute;right:16px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:640;
+  width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  background:rgba(12,22,34,.9);border:1px solid rgba(127,240,212,.35);color:var(--mint);
+  backdrop-filter:blur(10px);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+.nav-recenter .ico{width:19px;height:19px}
+.nav-recenter:active{transform:scale(.94)}
+html[data-scheme="light"] .xa-dest-label{background:rgba(255,255,255,.94);color:#7a4a12;border-color:rgba(180,110,30,.4)}
+html[data-scheme="light"] .nav-recenter{background:rgba(255,255,255,.92);color:#0d8f76}
+
+
+/* =========================================================
+   使用指南 3.0：示意图按新版界面重绘，圆圈由 JS 实测坐标精确套住
+   ========================================================= */
+.guide-why{display:flex;align-items:center;gap:7px;margin-top:10px;padding:8px 10px;
+  border-radius:11px;background:rgba(127,240,212,.07);border:1px solid rgba(127,240,212,.22);
+  color:var(--mint);font-size:10px;line-height:1.5}
+.guide-why .ico{width:13px;height:13px;flex:none}
+.guide-card p{margin-bottom:0}
+
+/* 示意图：固定像素行高，所有可指向元素都是真实 DOM 节点 */
+.gm-screen{height:170px;gap:5px}
+.gm-search{position:relative;height:22px;flex:none;gap:5px}
+.gm-search .ico{width:11px;height:11px;flex:none}
+.gm-search-btn{margin-left:auto;flex:none;padding:2px 8px;border-radius:6px;
+  background:var(--mint);color:#06251f;font-size:8px;font-weight:800}
+.gm-nearby{position:absolute;left:6px;top:6px;z-index:2;display:flex;align-items:center;gap:4px;
+  padding:4px 8px;border-radius:8px;background:rgba(16,34,44,.92);
+  border:1px solid rgba(127,240,212,.34);color:var(--mint);font-size:8px;font-weight:700}
+.gm-nearby i{width:5px;height:5px;border-radius:50%;background:var(--mint);box-shadow:0 0 6px var(--mint)}
+.gm-locate{position:absolute;right:6px;top:32px;width:18px;height:18px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;background:rgba(17,23,35,.7);
+  border:1px solid rgba(255,255,255,.12);color:#d0dae6}
+.gm-locate .ico{width:10px;height:10px}
+.gm-route-line{position:absolute;left:26%;top:32%;width:48%;height:42%;
+  border-left:3px solid var(--mint);border-bottom:3px solid var(--mint);
+  border-radius:0 0 0 10px;transform:skewX(-16deg);opacity:.75}
+.gm-me{position:absolute;left:22%;top:26%;color:var(--blue);display:flex}
+.gm-me .ico{width:13px;height:13px}
+.gm-tabs{height:26px;flex:none}
+.gm-tabs i{width:20px;height:20px}
+.gm-tabs .gm-help{width:30px;height:24px;border-radius:12px;background:#e2403a;color:#fff;
+  font-size:8px;font-weight:800;font-style:normal;display:flex;align-items:center;justify-content:center}
+
+/* 圆圈：尺寸/位置/圆角全部由 positionSpot() 实测后写入内联样式，
+   这里不再用固定 24px 和 translate(-50%,-50%)，避免坐标系错位导致歪斜 */
+.gm-spot{position:absolute;width:auto;height:auto;border:2px solid var(--mint);
+  box-shadow:0 0 0 5px rgba(127,240,212,.16),0 0 18px rgba(127,240,212,.5);
+  transform:none;animation:gmPulse 1.6s ease-in-out infinite;pointer-events:none;z-index:3}
+.gm-arrow{position:absolute;z-index:4;font-size:16px;line-height:1;font-weight:800;
+  color:var(--mint);transform:translate(-50%,-100%);text-shadow:0 0 12px rgba(127,240,212,.8);
+  pointer-events:none}
+.gm-arrow.below{transform:translate(-50%,0)}
+html[data-scheme="light"] .guide-why{background:rgba(31,143,131,.08);color:#0d8f76}

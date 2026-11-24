@@ -268,29 +268,86 @@
     XA.go('home');
     setTimeout(function () { var i = XA.$('#homeSearchInput'); if (i) { i.focus(); renderSuggest(i.value); } }, 120);
   }
-  /* ---------- 使用指南：五步图文对照，内嵌界面示意图 + 固定箭头指向功能位置 ---------- */
+  /* ---------- 使用指南：按当前 3.0 真实交互重写五步 ----------
+     每条含：标题、说明（做什么）、原则（为什么这么设计）、示意图目标元素 gm、
+     以及真实界面里的高亮 target。文案遵循八大原则，术语与实际界面完全一致。 */
   var GUIDE_STEPS = [
-    { title: '地图搜索', tip: '顶部搜索框输入武汉本地地点或品牌（如 藏龙东街地铁站），点「搜索」检索附近真实地点。', target: '.home-search', spot: [50, 15], spotLabel: '顶部搜索框' },
-    { title: '地点检索与提示气泡', tip: '输入时会出现联想推荐；右侧警示图标是提示气泡开关：点一下收起全部气泡，再点恢复；旁边图标可回到湖北美院演示起点。', target: '.home-floats', spot: [87, 40], spotLabel: '提示气泡开关' },
-    { title: '路线选择与导航', tip: '选好地点进入路线分析，比较安全分、路灯与监控，点【开始导航】出发；导航中点【退出导航】返回。', target: '.tab[data-tab="home"]', spot: [50, 76], spotLabel: '开始导航按钮' },
-    { title: '伴行板块', tip: '夜路不孤单：伴行页有音乐、听书与 AR 眼镜，声音陪你走完这段路。', target: '.tab[data-tab="entertainment"]', spot: [35, 94], spotLabel: '伴行标签' },
-    { title: 'SOS 紧急求助', tip: '遇到危险点 SOS：先二次确认，再倒计时缓冲；报警发出后，取消求助需人脸识别或密码验证。', target: '.sos-tab', spot: [50, 94], spotLabel: 'SOS 求助按钮' }
+    { title: '搜索真实地点',
+      tip: '顶部输入地铁站、店铺、小区或景点，边输边出联想；点结果即可看到该地点的真实地址与精确坐标。',
+      why: '易学性 · 效率：搜到哪个地方就是哪个地方，不用再猜位置。',
+      gm: 'search', label: '顶部搜索框', target: '.home-search', shape: 'pill' },
+    { title: '看清身边的守护信息',
+      tip: '「附近 12 人」显示同路段夜行者；右侧按钮切换风险点位，状态会明确写着「已隐藏 / 已显示」；定位按钮随时回到你的真实位置。',
+      why: '可见性 · 反馈：信息常驻可见，每次操作都有明确回应。',
+      gm: 'nearby', label: '附近同行者', target: '.nearby-chip', shape: 'pill' },
+    { title: '沿真实路线出发',
+      tip: '选好地点后比较安全分、路灯与监控，点「开始导航」；地图上会出现沿道路的引导线与橙色终点，缩放拖动都跟着走，右下角可一键回到完整路线。',
+      why: '一致性 · 用户控制：路线与终点始终跟着地图，随时可退出。',
+      gm: 'route', label: '开始导航', target: '.tab[data-tab="home"]', shape: 'pill' },
+    { title: '夜路有声音陪着',
+      tip: '伴行页有音乐、听书与 AR 眼镜入口。不想被打扰时随时切回导航，声音不会挡住任何安全操作。',
+      why: '容错 · 美观：陪伴是可选的，不打断主任务。',
+      gm: 'tab-music', label: '伴行标签', target: '.tab[data-tab="entertainment"]', shape: 'round' },
+    { title: '按危险程度求救',
+      tip: '中央「求救」分两级：有点不安先「共享实时位置」（不报警、不打扰警方）；确认危险才进 SOS，确认后仍有可取消的倒计时。',
+      why: '容错 · 用户控制：不必小题大做，误触也来得及取消。',
+      gm: 'tab-help', label: '求救按钮', target: '.sos-tab', shape: 'round' }
   ];
+  /* 示意图：每个可指向元素带 data-gm，圆圈由 positionSpot() 实测坐标后精确套住 */
   function mockHtml(s) {
-    var x = s.spot[0], y = s.spot[1], below = y < 24;
-    return '<div class="guide-mock"><div class="gm-screen">' +
-      '<span class="gm-status">安星 · 夜行安全　23:57</span>' +
-      '<span class="gm-search">搜索地点或品牌</span>' +
-      '<span class="gm-map">地图 · 湖北美院藏龙岛校区<span class="gm-float">' + ic('warning') + '</span></span>' +
-      '<span class="gm-route">推荐路线 A　【开始导航】</span>' +
-      '<span class="gm-tabs"><i>' + ic('navigation') + '</i><i>' + ic('music') + '</i><i class="gm-sos">SOS</i><i>' + ic('users') + '</i><i>' + ic('user') + '</i></span>' +
-      '<span class="gm-spot" style="left:' + x + '%;top:' + y + '%"></span>' +
-      '<span class="gm-arrow' + (below ? ' below' : '') + '" style="left:' + x + '%;top:' + y + '%">' + (below ? '↑' : '↓') + '</span>' +
-      '</div><small>界面示意图 · 箭头固定指向「' + s.spotLabel + '」</small></div>';
+    return '<div class="guide-mock"><div class="gm-screen" id="gmScreen">' +
+      '<span class="gm-status">安星 · 夜行安全　21:40</span>' +
+      '<span class="gm-search" data-gm="search">' + ic('search') + '输入地点或品牌<span class="gm-search-btn">搜索</span></span>' +
+      '<span class="gm-map">' +
+        '<span class="gm-nearby" data-gm="nearby"><i></i>附近 12 人</span>' +
+        '<span class="gm-float" data-gm="risk">' + ic('warning') + '</span>' +
+        '<span class="gm-locate" data-gm="locate">' + ic('pin') + '</span>' +
+        '<span class="gm-route-line"></span>' +
+        '<span class="gm-me">' + ic('navigation') + '</span>' +
+      '</span>' +
+      '<span class="gm-route" data-gm="route">推荐路线 A　【开始导航】</span>' +
+      '<span class="gm-tabs">' +
+        '<i data-gm="tab-nav">' + ic('navigation') + '</i>' +
+        '<i data-gm="tab-music">' + ic('music') + '</i>' +
+        '<i class="gm-help" data-gm="tab-help">求救</i>' +
+        '<i data-gm="tab-community">' + ic('users') + '</i>' +
+        '<i data-gm="tab-profile">' + ic('user') + '</i>' +
+      '</span>' +
+      '<span class="gm-spot" id="gmSpot"></span>' +
+      '<span class="gm-arrow" id="gmArrow">↓</span>' +
+      '</div><small>界面示意图 · 已圈出「' + esc(s.label) + '」</small></div>';
+  }
+  /* 关键修复：不再用百分比猜位置。渲染完成后实测目标元素相对示意图的
+     真实矩形，按原尺寸外扩 padding 套框，保证圆圈完整、端正地包住目标。 */
+  function positionSpot(s) {
+    var screen = XA.$('#gmScreen'), spot = XA.$('#gmSpot'), arrow = XA.$('#gmArrow');
+    if (!screen || !spot || !arrow) return;
+    var t = XA.$('[data-gm="' + s.gm + '"]', screen);
+    if (!t) return;
+    var sr = screen.getBoundingClientRect(), tr = t.getBoundingClientRect();
+    if (!tr.width || !tr.height) return;
+    var pad = s.shape === 'round' ? 6 : 5;
+    var w = tr.width + pad * 2, h = tr.height + pad * 2;
+    var l = tr.left - sr.left - pad, top = tr.top - sr.top - pad;
+    spot.style.left = l + 'px'; spot.style.top = top + 'px';
+    spot.style.width = w + 'px'; spot.style.height = h + 'px';
+    spot.style.borderRadius = s.shape === 'round' ? '50%' : Math.round(Math.min(w, h) / 2) + 'px';
+    /* 箭头在框上方；若上方空间不足则移到框下方并翻转方向 */
+    var above = top > 26;
+    arrow.style.left = (l + w / 2) + 'px';
+    arrow.style.top = above ? (top - 3) + 'px' : (top + h + 3) + 'px';
+    arrow.textContent = above ? '↓' : '↑';
+    arrow.classList.toggle('below', !above);
   }
   function clearGuideHl() { XA.$$('.guide-hl').forEach(function (el) { el.classList.remove('guide-hl'); }); }
   function guide() {
-    var phone = XA.$('#phone'); if (!phone || XA.$('#guideLayer')) return;
+    /* 「我的 → 使用指南」是显式入口，任何时候都必须能打开，
+       不受"已看过/已关闭"状态影响；打开时收起底部提示栏避免重叠。 */
+    XA.guideDismissed = false;
+    XA.guideShown = true;
+    var hint = XA.$('#guideHint'); if (hint) hint.remove();
+    var phone = XA.$('#phone'); if (!phone) return;
+    var old = XA.$('#guideLayer'); if (old) old.remove();
     phone.insertAdjacentHTML('beforeend', '<div class="guide-layer" id="guideLayer"><div class="guide-card"><span class="guide-step" id="guideStep">1 / ' + GUIDE_STEPS.length + '</span><div id="guideBody"></div><div class="guide-actions"><button data-action="skip-guide">跳过</button><button class="primary-btn" data-action="next-guide" id="guideNext">下一步</button></div></div></div>');
     XA.guideStep = 1; renderGuide();
   }
@@ -301,13 +358,24 @@
     if (el) el.classList.add('guide-hl');
     var stepEl = XA.$('#guideStep'), body = XA.$('#guideBody'), next = XA.$('#guideNext');
     if (stepEl) stepEl.textContent = XA.guideStep + ' / ' + GUIDE_STEPS.length;
-    if (body) body.innerHTML = '<h2>' + s.title + '</h2><p>' + s.tip + '</p>' + mockHtml(s);
+    if (body) {
+      body.innerHTML = '<h2>' + s.title + '</h2><p>' + s.tip + '</p>' +
+        '<div class="guide-why">' + ic('shield') + '<span>' + s.why + '</span></div>' + mockHtml(s);
+    }
     if (next) next.textContent = XA.guideStep === GUIDE_STEPS.length ? '开始体验' : '下一步';
+    /* innerHTML 后直接同步实测（读取 rect 会强制浏览器完成布局），
+       再用 rAF 兜底一次；不依赖动画帧，任何环境下都精确。 */
+    positionSpot(s);
+    requestAnimationFrame(function () { positionSpot(s); });
+    if (XA._guideResize) window.removeEventListener('resize', XA._guideResize);
+    XA._guideResize = function () { positionSpot(GUIDE_STEPS[XA.guideStep - 1] || {}); };
+    window.addEventListener('resize', XA._guideResize);
   }
   function endGuide() {
     clearGuideHl();
+    if (XA._guideResize) { window.removeEventListener('resize', XA._guideResize); XA._guideResize = null; }
     var l = XA.$('#guideLayer'); if (l) l.remove();
-    try { localStorage.setItem('xa_guide_v2', '1'); } catch (e) {}
+    if (XA.markGuideSeen) XA.markGuideSeen();   // 完成后持久化，刷新不再打扰
   }
 
   /* 实时定位由 legacy.js 统一发布；poi-map 只订阅，避免多个 watcher 抢定位 */

@@ -168,10 +168,9 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .nav-session{position:absolute;inset:0;z-index:140;background:#070b12;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 .nav-session.open{transform:none}
 .nav-map{position:relative;height:320px;background:radial-gradient(320px 200px at 70% 30%,rgba(32,70,66,.5),transparent 70%),linear-gradient(180deg,#0b131c,#080c13);overflow:hidden;flex:none}
-.nav-map svg{position:absolute;inset:0;width:100%;height:100%}
-.nav-map .nv-road{fill:none;stroke:rgba(255,255,255,.07);stroke-width:12}
-.nav-map .nv-route{fill:none;stroke:var(--mint);stroke-width:4;stroke-linecap:round;filter:drop-shadow(0 0 9px rgba(127,240,212,.7))}
-.nav-map .nv-user{position:absolute;left:52%;top:58%;width:18px;height:18px;border-radius:50%;background:var(--blue);border:3px solid #dbeaff;box-shadow:0 0 0 10px rgba(143,184,255,.14),0 0 22px var(--blue)}
+/* 导航地图改由 Leaflet 渲染真实路线/标记；旧的装饰 SVG 与固定定位圆点已移除。
+   注意：这里不要再写 `.nav-map svg{...}` 之类的通用规则，
+   它会命中 Leaflet overlayPane 的 <svg> 和 HUD 图标，破坏折线定位。 */
 .nav-map .nv-label{position:absolute;left:18px;top:16px;display:flex;gap:6px;align-items:center;font-size:10px;color:var(--mint);background:rgba(6,12,18,.7);border:1px solid rgba(127,240,212,.2);padding:6px 10px;border-radius:12px}
 .nav-turn{position:absolute;left:16px;right:16px;top:14px;margin-top:46px;border-radius:20px;background:linear-gradient(120deg,rgba(24,32,45,.94),rgba(12,18,28,.94));border:1px solid var(--line);padding:14px;display:flex;align-items:center;gap:12px;box-shadow:0 16px 40px rgba(0,0,0,.45)}
 .nav-turn .turn-arrow{width:48px;height:48px;border-radius:15px;background:rgba(127,240,212,.12);color:var(--mint);display:flex;align-items:center;justify-content:center;flex:none}

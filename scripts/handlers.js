@@ -457,13 +457,10 @@ XA.startNavigation = function (mode) {
   var box = document.createElement('div');
   box.className = 'nav-session ' + (ar ? 'ar-nav pure-nav' : 'phone-nav');
 
+  /* 导航地图交给 Leaflet 全权渲染：路线折线、终点、"我的位置"都是真实地理图层，
+     会随缩放/拖动同步移动。这里不再放任何固定百分比定位的 DOM 装饰。 */
   var map = '<div class="nav-map">' +
-      '<svg viewBox="0 0 390 320" preserveAspectRatio="none">' +
-        '<path class="nv-road" d="M-10 260 C90 240 150 180 220 130 S320 80 410 40"/>' +
-        '<path class="nv-road" d="M-10 110 C100 130 190 180 260 250 S330 300 410 310"/>' +
-        '<path class="nv-route" d="M40 300 C110 270 150 205 205 160 S290 110 350 60"/>' +
-      '</svg>' +
-      '<span class="nv-user"></span>';
+      '<button class="nav-recenter" data-action="nav-recenter" aria-label="回到我的位置">' + ic('pin') + '</button>';
 
   if (ar) {
     map += '<div class="ar-nav-panel">' +
@@ -501,17 +498,38 @@ XA.startNavigation = function (mode) {
   XA.applyI18n();
   requestAnimationFrame(function () { box.classList.add('open'); });
 
+  /* 优先使用高德返回的真实步行步骤；没有真实路线时才回落到演示文案 */
+  var real = XA.realNavSteps || [];
+  var steps = real.length ? real.map(function (s) {
+    var txt = String(s.instruction || '').replace(/<[^>]+>/g, '').trim();
+    var road = String(s.road || '').trim();
+    var d = Number(s.distance) || 0;
+    return {
+      title: txt || ('沿' + (road || '当前道路') + '前行'),
+      sub: (road ? road + ' · ' : '') + '步行约 ' + d + ' m · 注意观察路面照明',
+      dist: String(Math.max(1, Math.round(d))),
+      action: s.action || ''
+    };
+  }) : XA.navSteps.map(function (s) { return Object.assign({}, s, { action: '' }); });
+  var totalM = real.reduce(function (a, s) { return a + (Number(s.distance) || 0); }, 0);
+  var totalMin = real.reduce(function (a, s) { return a + (Number(s.duration) || 0); }, 0) / 60;
+  if (!real.length) { totalM = 1200; totalMin = 18; }
+  var walkedM = 0;
   var i = 0;
   function paint() {
-    var step = XA.navSteps[i];
+    var step = steps[i] || steps[steps.length - 1];
     var set = function (sel, val) { var el = XA.$(sel, box); if (el) el.textContent = val; };
     set('#turnTitle', step.title);
     set('#turnSub', step.sub);
     set('#turnDist', String(step.dist).replace(/[^\d.]/g, '') || '30');
-    set('#navRemain', Math.max(1, 18 - i * 4));
-    set('#navDist', Math.max(0.1, 1.2 - i * 0.3).toFixed(1));
+    var leftM = Math.max(0, totalM - walkedM);
+    set('#navRemain', Math.max(1, Math.ceil(totalMin * leftM / Math.max(totalM, 1))));
+    set('#navDist', (leftM / 1000).toFixed(1));
     var arrow = XA.$('.nav-info-icon .ico, .turn-arrow .ico', box);
-    if (arrow) arrow.style.transform = i === 2 ? 'rotate(-90deg)' : (i === 3 ? 'rotate(0)' : 'rotate(45deg)');
+    if (arrow) {
+      var a = String(step.action || '');
+      arrow.style.transform = /左/.test(a) ? 'rotate(-90deg)' : /右/.test(a) ? 'rotate(90deg)' : 'rotate(0deg)';
+    }
     XA.$$('.nav-step', box).forEach(function (el, j) {
       el.classList.toggle('done', j < i);
       el.classList.toggle('active', j === i);
@@ -519,14 +537,15 @@ XA.startNavigation = function (mode) {
   }
   paint();
   XA.navTimer = setInterval(function () {
+    walkedM += Number((steps[i] || {}).dist) || 0;
     i++;
-    if (i >= XA.navSteps.length) {
+    if (i >= steps.length) {
       clearInterval(XA.navTimer);
       XA.toast('路线指引已结束 · 请观察现场并主动结束导航');
       return;
     }
     paint();
-    XA.toast(XA.navSteps[i].title);
+    XA.toast(steps[i].title);
   }, 4000);
   XA.toast(ar ? 'AR 眼镜导航已开始 · 抬头看路' : '安全导航已开始 · 安星陪你走夜路');
 };
