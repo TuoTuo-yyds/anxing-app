@@ -409,8 +409,8 @@
   }
   /* 用户控制 + 易学性：引导改为非阻断提示，由用户点「查看」才进入；
      不再强制弹层、不再在进入功能页时自动打断用户 */
-  /* 引导是常驻入口：只记录"看过"，不据此隐藏提示栏；
-     不再依赖「刚登录」那一瞬间，也不因点过其它按钮而永久消失。 */
+  /* 引导提示栏：首次进入出现；点「查看」看完教程、或点「×」关闭后即消失，
+     并持久化「已看过」，刷新不再打扰。用户仍可从「我的 → 使用指南」随时手动打开。 */
   var GUIDE_KEY = 'xa_guide_v3';
   XA.guidePending = false;
   XA.guideShown = false;
@@ -420,17 +420,23 @@
     try { localStorage.setItem(GUIDE_KEY, '1'); } catch (e) {}
   }
   XA.markGuideSeen = markGuideSeen;
-  XA.showGuideHint = function () { XA.guideShown = false; showGuideHint(); };
-  /* 临时收起（例如切到别的标签页）时复位 guideShown，回到首页还能再出现；
-     只有用户明确点「关闭」才在本次会话内不再出现。 */
+  /* 统一的关闭动作：移除提示栏 + 标记已看过 + 给出可再次找到入口的明确反馈 */
+  XA.dismissGuideHint = function () {
+    XA.guideDismissed = true;
+    XA.guidePending = false;
+    XA.guideShown = false;
+    var h = XA.$('#guideHint'); if (h) h.remove();
+    markGuideSeen();
+    XA.toast('已关闭引导提示 · 可在「我的 → 使用指南」随时查看', 'info');
+  };
+  /* 临时收起（例如切到别的标签页）时复位 guideShown；已关闭/已看过则不再回来。 */
   function hideGuideHint() {
     var h = XA.$('#guideHint'); if (h) h.remove();
-    if (!XA.guideDismissed) { XA.guideShown = false; XA.guidePending = true; }
+    if (!XA.guideDismissed && !guideSeen()) { XA.guideShown = false; XA.guidePending = true; }
   }
   function showGuideHint() {
-    /* 使用引导是常驻入口：只要用户没在本次会话里明确点「关闭」，就一直可见。
-       不再因为"看完一次"或点过其它按钮就永久消失。 */
-    if (XA.$('#guideHint') || XA.guideDismissed) return;
+    /* 看过教程或主动关闭后不再自动出现；手动入口在 guide() 里单独放行。 */
+    if (XA.$('#guideHint') || XA.guideDismissed || guideSeen()) return;
     var phone = XA.$('#phone'); if (!phone) return;
     var hint = document.createElement('div');
     hint.className = 'guide-hint';
@@ -443,7 +449,7 @@
     phone.appendChild(hint);
   }
   XA.maybeStartGuide = function () {
-    if (!XA.guidePending || XA.guideShown || XA.guideDismissed) return;
+    if (!XA.guidePending || XA.guideShown || XA.guideDismissed || guideSeen()) return;
     if (XA.current !== 'home') return;                       // 不打断用户正在使用的功能页
     var login = XA.$('#loginScreen');
     if (login && login.classList.contains('open')) return;   // 登录未完成，绝不出现
@@ -451,16 +457,13 @@
     XA.guideShown = true;
     showGuideHint();
   };
-  XA.actions['dismiss-guide-hint'] = function () {
-    XA.guideDismissed = true;    // 仅本次会话关闭
-    hideGuideHint();
-    XA.toast('已关闭引导提示 · 可在「我的 → 使用指南」随时查看', 'info');
-  };
+  XA.actions['dismiss-guide-hint'] = function () { XA.dismissGuideHint(); };
   /* 启动时独立安排引导提示，不再依赖登录/跳过登录那一次回调 */
   function scheduleGuideHint() {
+    if (guideSeen()) return;
     XA.guidePending = true;
     var tryShow = function () {
-      if (XA.guideDismissed) return;
+      if (XA.guideDismissed || guideSeen()) return;
       var login = XA.$('#loginScreen');
       if (login && login.classList.contains('open')) { setTimeout(tryShow, 900); return; }
       XA.maybeStartGuide();
@@ -1352,8 +1355,8 @@
   XA.go = function (screen, noHistory) {
     origGo(screen, noHistory);
     if (screen !== 'home') hideGuideHint();   // 离开首页临时收起，不打断导航或其它功能
-    else if (!XA.guideDismissed && !XA.$('#guideHint') && XA.maybeStartGuide) {
-      XA.guidePending = true; XA.guideShown = false; XA.maybeStartGuide();   // 回到首页自动重新出现
+    else if (!XA.guideDismissed && !guideSeen() && !XA.$('#guideHint') && XA.maybeStartGuide) {
+      XA.guidePending = true; XA.guideShown = false; XA.maybeStartGuide();   // 未看过时回到首页自动出现
     }
     // 登录完成后，首次进入功能页面立即弹出新手引导（登录层仍打开时不弹）
     if (XA.guidePending && screen !== 'sos' && XA.maybeStartGuide) {

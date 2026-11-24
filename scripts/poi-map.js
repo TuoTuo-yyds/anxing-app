@@ -46,59 +46,49 @@
     return fetch(url, { signal: ctrl.signal }).finally(function () { clearTimeout(timer); });
   }
 
-  /* ---------- 输入联想推荐：真实 POI（高德 / 百度），不再用编造地点 ---------- */
+  /* ---------- 合并后的搜索下拉 ----------
+     输入即检索全国真实地点，搜索框下方直接列出「名称 + 地址 + 距离」的结果；
+     点任一条直接打开地点详情，不再经过中间的「附近地点」面板。
+     这是「搜索栏内容」与「附近地点列表」合并后的唯一结果入口。 */
   var suggestSeq = 0, suggestTimer = null;
-  function localSuggest(q) {
-    var out = [];
-    Object.keys(CATEGORY).forEach(function (k) {
-      if (k.indexOf(q) >= 0 || q.indexOf(k) >= 0) out.push({ q: k, label: k, sub: '搜索附近' + k });
-    });
-    (XA.searchHistory || []).forEach(function (h) {
-      if (h.indexOf(q) >= 0) out.push({ q: h, label: h, sub: '历史搜索' });
-    });
-    return out;
-  }
-  function realSuggest(q) {
-    var src = (XA.Geo && XA.Geo.hasKey()) ? XA.Geo.suggest(q, { origin: { lat: gps.lat, lng: gps.lng } })
-                                          : XA.GeoFallback.suggest(q);
-    return Promise.resolve(src).then(function (list) {
-      return (list || []).slice(0, 8).map(function (p) {
-        return { q: p.name || p.q, label: p.name || p.label,
-                 sub: (p.address || p.sub || '真实地点') + (p.approx ? ' · 演示精度' : ' · 精确坐标') };
-      });
-    }).catch(function () { return []; });
-  }
   function renderSuggest(q) {
     var box = XA.$('#poiSuggest'); if (!box) return;
     q = String(q || '').trim();
     if (!q) { hideSuggest(); return; }
     var seq = ++suggestSeq;
-    function paint(list, loading) {
-      if (seq !== suggestSeq) return;
-      if (!list.length && loading) {
-        box.innerHTML = '<button data-action="poi-suggest" data-q="' + esc(q) + '">' + ic('search') +
-          '<span><b>搜索「' + esc(q) + '」</b><small>正在查询真实地点…</small></span>' + ic('chevron') + '</button>';
-      } else if (!list.length) {
-        box.innerHTML = '<button data-action="poi-suggest" data-q="' + esc(q) + '">' + ic('search') +
-          '<span><b>搜索「' + esc(q) + '」</b><small>在全国真实地图中检索</small></span>' + ic('chevron') + '</button>';
-      } else {
-        box.innerHTML = list.slice(0, 8).map(function (o) {
-          return '<button data-action="poi-suggest" data-q="' + esc(o.q) + '">' + ic('search') +
-            '<span><b>' + esc(o.label) + '</b><small>' + esc(o.sub) + '</small></span>' + ic('chevron') + '</button>';
-        }).join('');
-      }
-      box.classList.add('open');
-    }
-    var local = localSuggest(q);
-    paint(local, true);
+    box.innerHTML = '<div class="poi-group">正在全国真实地图中查找「' + esc(q) + '」…</div>';
+    box.classList.add('open');
     clearTimeout(suggestTimer);
     suggestTimer = setTimeout(function () {
-      realSuggest(q).then(function (real) {
-        var seen = {}, merged = [];
-        real.concat(local).forEach(function (o) {
-          if (seen[o.q]) return; seen[o.q] = 1; merged.push(o);
-        });
-        paint(merged, false);
+      searchAll(q).then(function (res) {
+        if (seq !== suggestSeq) return;
+        var list = clean((res.real || []).concat(res.demo || []), 12);
+        state.query = q;
+        state.results = list;
+        state.open = false;                       // 明确不打开「附近地点」面板
+        var panel = XA.$('#poiResults'); if (panel) panel.classList.remove('open');
+        if (!list.length) {
+          box.innerHTML = '<div class="poi-group">没有找到「' + esc(q) + '」</div>' +
+            '<div class="poi-suggest-empty">换个更完整的名称试试，例如「藏龙东街地铁站」「广州塔」。</div>';
+          return;
+        }
+        var approx = list.some(function (p) { return p.approx; });
+        box.innerHTML = '<div class="poi-group">' +
+            (approx ? '真实地点 · 演示精度坐标' : '真实地图地点 · 精确坐标') +
+            ' · ' + list.length + ' 个 · 点开即看详情</div>' +
+          list.map(function (p, i) {
+            return '<button class="poi-sug-item" data-action="poi-direct" data-poi="' + i + '">' +
+              ic('pin') + '<span><b>' + esc(p.name) + '</b><small>' +
+              esc(p.address || '真实地图收录地点') + '</small></span>' +
+              '<em>' + fmt(p.dist) + '</em></button>';
+          }).join('');
+        box.classList.add('open');
+        drawMarkers();
+        if (map && markers.length) map.fitBounds(L.featureGroup(markers).getBounds().pad(.35), { maxZoom: 16 });
+      }).catch(function () {
+        if (seq !== suggestSeq) return;
+        box.innerHTML = '<div class="poi-group">地点服务暂时不可用</div>' +
+          '<div class="poi-suggest-empty">请检查网络后重试。</div>';
       });
     }, 260);
   }
@@ -210,34 +200,14 @@
       markers.push(m);
     });
   }
+  /* 点「搜索」或按回车：结果仍只出现在搜索框下方的下拉里，不再弹「附近地点」面板 */
   function doSearch(q) {
     q = String(q || '').trim();
     if (!q) { XA.toast('请先输入地点名称，再点搜索'); var i0 = XA.$('#homeSearchInput'); if (i0) i0.focus(); return; }
-    hideSuggest();
-    /* 演示中心恒为武汉美院：不再启动时自动取定位，避免搜索结果串到其它城市 */
-    runSearch(q);
-  }
-  function runSearch(q) {
-    state.query = q; state.results = []; state.open = true;
     var input = XA.$('#homeSearchInput'); if (input) input.value = q;
-    var btn = XA.$('#homeSearchBtn'); if (btn) { btn.disabled = true; btn.textContent = '搜索中'; }
-    renderResults(q);
-    XA.$('#poiList').innerHTML = '<div class="poi-empty">正在检索附近地点…</div>';
-    searchAll(q).then(function (res) {
-      state.results = (res.real || []).concat(res.demo || []);
-      renderResults(q); drawMarkers();
-      if (!state.results.length) {
-        XA.$('#poiList').innerHTML = '<div class="poi-empty">没有找到「' + esc(q) + '」。<br>换个更完整的名称试试，例如「藏龙东街地铁站」「武汉大学」。</div>';
-        XA.toast('未找到该地点 · 可换关键词重试');
-      } else {
-        if (map && markers.length) map.fitBounds(L.featureGroup(markers).getBounds().pad(.35), { maxZoom: 16 });
-        XA.toast(res.precise ? '找到 ' + state.results.length + ' 个真实地点 · 米级精确坐标'
-                             : '找到 ' + state.results.length + ' 个真实地点 · 配置地图 Key 可升级为米级');
-      }
-    }).catch(function () {
-      XA.$('#poiList').innerHTML = '<div class="poi-empty">地点服务暂时不可用，请检查网络后重试。</div>';
-    }).finally(function () { if (btn) { btn.disabled = false; btn.textContent = '搜索'; } });
+    renderSuggest(q);
   }
+  function runSearch(q) { doSearch(q); }   // 兼容旧调用，统一走合并后的下拉
   function openDetail(i) {
     var p = state.results[i]; if (!p) return;
     var src = p.approx ? '真实地点 · 演示精度坐标' : '真实地点 · 精确坐标';
@@ -273,8 +243,8 @@
      以及真实界面里的高亮 target。文案遵循八大原则，术语与实际界面完全一致。 */
   var GUIDE_STEPS = [
     { title: '搜索真实地点',
-      tip: '顶部输入地铁站、店铺、小区或景点，边输边出联想；点结果即可看到该地点的真实地址与精确坐标。',
-      why: '易学性 · 效率：搜到哪个地方就是哪个地方，不用再猜位置。',
+      tip: '顶部输入地铁站、店铺、小区或景点，搜索框下方直接列出真实地点与距离；点其中一条就直接看到该地点的地址、类别、坐标，并可立即选择路线导航。',
+      why: '易学性 · 效率：一步到位，不用在两层列表之间来回点。',
       gm: 'search', label: '顶部搜索框', target: '.home-search', shape: 'pill' },
     { title: '看清身边的守护信息',
       tip: '「附近 12 人」显示同路段夜行者；右侧按钮切换风险点位，状态会明确写着「已隐藏 / 已显示」；定位按钮随时回到你的真实位置。',
@@ -374,8 +344,10 @@
     clearGuideHl();
     if (XA._guideResize) { window.removeEventListener('resize', XA._guideResize); XA._guideResize = null; }
     var l = XA.$('#guideLayer'); if (l) l.remove();
-    if (XA.markGuideSeen) XA.markGuideSeen();          // 记录已看过（不关闭入口）
-    if (XA.showGuideHint) setTimeout(XA.showGuideHint, 260);  // 引导条仍常驻，随时可再打开
+    /* 看完 / 跳过教程后，底部引导提示栏一并关闭：
+       持久化「已看过」→ 刷新不再自动出现；明确提示可随时从「我的 → 使用指南」重新打开。 */
+    if (XA.markGuideSeen) XA.markGuideSeen();
+    if (XA.dismissGuideHint) XA.dismissGuideHint();
   }
 
   /* 实时定位由 legacy.js 统一发布；poi-map 只订阅，避免多个 watcher 抢定位 */
@@ -388,7 +360,9 @@
     map = el._xaMap || null;
     if (map) { XA.settings.follow = false; setTimeout(function () { map.invalidateSize(); }, 200); }
     if (XA.position && XA.position.real) XA.onPositionChange(XA.position);
-    if (state.open && state.results.length) { renderResults(state.query); drawMarkers(); }
+    /* 恢复页面状态只重画地图标记，绝不重新弹出「附近地点」面板 */
+    if (state.results.length) drawMarkers();
+    var panel = XA.$('#poiResults'); if (panel) panel.classList.remove('open');
     /* 引导改由 legacy.js 在登录完成后给出非阻断提示，由用户主动打开，这里不再定时强弹 */
   }
   XA.actions.search = focusSearch;
@@ -398,6 +372,13 @@
   XA.actions['search-category'] = function (el) { doSearch(el.dataset.category); };
   XA.actions['poi-suggest'] = function (el) { var i = XA.$('#homeSearchInput'); if (i) i.value = el.dataset.q; doSearch(el.dataset.q); };
   XA.actions['close-search'] = closeSearch;
+  /* 下拉里的地点：一步直达详情弹层（跳过中间的「附近地点」结果面板） */
+  XA.actions['poi-direct'] = function (el) {
+    var i = +el.dataset.poi;
+    if (!state.results[i]) return;
+    hideSuggest();                 // 关闭下拉，避免遮住详情弹层
+    openDetail(i);
+  };
   XA.actions['poi-detail'] = function (el) { openDetail(+el.dataset.poi); };
   XA.actions['locate-poi'] = function (el) { var p = state.results[+el.dataset.poi]; if (p && map) { XA.closeModal(); map.setView(gcj(p.lat, p.lng), 18); XA.toast('已定位到 ' + p.name); } };
   XA.actions['navigate-poi'] = function (el) {
