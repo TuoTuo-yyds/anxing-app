@@ -409,62 +409,56 @@
   }
   /* 用户控制 + 易学性：引导改为非阻断提示，由用户点「查看」才进入；
      不再强制弹层、不再在进入功能页时自动打断用户 */
-  /* 引导提示栏：每次打开 APP 都显示（底部常驻教程入口）。
-     点「查看」看完教程或点「×」→ 本次会话内收起并给出关闭提示；
-     不做持久化屏蔽，下次打开会重新出现；「我的 → 使用指南」始终可手动打开。 */
+  /* 引导提示栏是首页模板里的静态 DOM：页面一打开就在，
+     不依赖任何延迟、登录状态或 localStorage 判断。
+     点「查看」看完教程或点「×」→ 本次会话内收起（加 class，不删元素）；
+     下次打开/刷新会重新出现。「我的 → 使用指南」始终可手动打开。 */
   XA.guidePending = false;
-  XA.guideShown = false;
+  XA.guideShown = true;        // 静态元素默认可见
   XA.guideDismissed = false;
-  /* 兼容旧调用：已不再持久化任何「已看过」标记 */
-  XA.markGuideSeen = function () {};
-  /* 统一的关闭动作：本次会话内移除提示栏 + 明确反馈入口在哪 */
+  XA.markGuideSeen = function () {};   // 兼容旧调用，不再持久化屏蔽
+  /* 关闭：本次会话隐藏 + 显示一条约 3 秒后缓慢淡出的提示 */
   XA.dismissGuideHint = function () {
     XA.guideDismissed = true;
     XA.guidePending = false;
     XA.guideShown = false;
-    var h = XA.$('#guideHint'); if (h) h.remove();
+    var h = XA.$('#guideHint'); if (h) h.classList.add('is-hidden');
     XA.toast('已关闭引导提示 · 可在「我的 → 使用指南」随时查看', 'info');
+    var t = XA.$('#toast');
+    if (t) {
+      t.classList.add('toast--slow-fade');
+      /* 停留 3 秒后移除 show，由 CSS 用 1.15s 缓慢淡出 */
+      clearTimeout(XA._toastTimer);
+      XA._toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3000);
+    }
   };
-  /* 临时收起（例如切到别的标签页）时复位 guideShown；本次已关闭则不再回来。 */
+  /* 切到别的标签页时临时收起；本次已关闭则不再回来 */
   function hideGuideHint() {
-    var h = XA.$('#guideHint'); if (h) h.remove();
+    var h = XA.$('#guideHint'); if (h) h.classList.add('is-hidden');
     if (!XA.guideDismissed) { XA.guideShown = false; XA.guidePending = true; }
   }
   function showGuideHint() {
-    /* 每次打开都会出现；只有本次会话里明确关闭过才不再出现。 */
-    if (XA.$('#guideHint') || XA.guideDismissed) return;
+    if (XA.guideDismissed) return;
+    var h = XA.$('#guideHint');
+    if (h) { h.classList.remove('is-hidden'); XA.guideShown = true; return; }
+    /* 兜底：模板缺失时才动态创建 */
     var phone = XA.$('#phone'); if (!phone) return;
-    var hint = document.createElement('div');
-    hint.className = 'guide-hint';
-    hint.id = 'guideHint';
-    hint.setAttribute('role', 'status');
-    hint.innerHTML = '<span class="guide-hint-ico">' + ic('glasses') + '</span>' +
+    phone.insertAdjacentHTML('beforeend',
+      '<div class="guide-hint" id="guideHint" role="status">' +
+      '<span class="guide-hint-ico">' + ic('glasses') + '</span>' +
       '<span class="guide-hint-copy"><b>第一次来安星？</b><small>5 步看懂真实定位 · 真实地点 · 分级求救</small></span>' +
       '<button class="guide-hint-go" data-action="open-guide">查看</button>' +
-      '<button class="guide-hint-x" data-action="dismiss-guide-hint" aria-label="关闭引导提示">' + ic('close') + '</button>';
-    phone.appendChild(hint);
+      '<button class="guide-hint-x" data-action="dismiss-guide-hint" aria-label="关闭引导提示">' + ic('close') + '</button></div>');
+    XA.guideShown = true;
   }
   XA.maybeStartGuide = function () {
-    if (!XA.guidePending || XA.guideShown || XA.guideDismissed) return;
-    if (XA.current !== 'home') return;                       // 不打断用户正在使用的功能页
-    var login = XA.$('#loginScreen');
-    if (login && login.classList.contains('open')) return;   // 登录未完成，绝不出现
+    if (XA.guideDismissed) return;
+    if (XA.current !== 'home') return;
     XA.guidePending = false;
-    XA.guideShown = true;
     showGuideHint();
   };
   XA.actions['dismiss-guide-hint'] = function () { XA.dismissGuideHint(); };
-  /* 启动时独立安排引导提示，每次打开都会出现；不再依赖登录/跳过登录那一次回调 */
-  function scheduleGuideHint() {
-    XA.guidePending = true;
-    var tryShow = function () {
-      if (XA.guideDismissed) return;
-      var login = XA.$('#loginScreen');
-      if (login && login.classList.contains('open')) { setTimeout(tryShow, 900); return; }
-      XA.maybeStartGuide();
-    };
-    setTimeout(tryShow, 1400);
-  }
+  function scheduleGuideHint() { XA.guidePending = true; XA.maybeStartGuide(); }
   XA.scheduleGuideHint = scheduleGuideHint;
   function closeLogin() {
     var el = XA.$('#loginScreen');
@@ -1350,9 +1344,7 @@
   XA.go = function (screen, noHistory) {
     origGo(screen, noHistory);
     if (screen !== 'home') hideGuideHint();   // 离开首页临时收起，不打断导航或其它功能
-    else if (!XA.guideDismissed && !XA.$('#guideHint') && XA.maybeStartGuide) {
-      XA.guidePending = true; XA.guideShown = false; XA.maybeStartGuide();   // 回到首页时教程入口自动出现
-    }
+    else if (XA.maybeStartGuide) XA.maybeStartGuide();   // 回到首页时教程入口自动出现（静态元素）
     // 登录完成后，首次进入功能页面立即弹出新手引导（登录层仍打开时不弹）
     if (XA.guidePending && screen !== 'sos' && XA.maybeStartGuide) {
       var pendingScreen = screen;

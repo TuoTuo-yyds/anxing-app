@@ -32,6 +32,15 @@ XA_SCREENS.home = `
     <span class="nearby-cta">看看 ↗</span>
   </button>
 
+  <!-- 使用教程入口：静态元素，页面一打开就存在，不依赖延迟调度或登录状态。
+       点「查看」打开 5 步教程；看完或点 × 后本次会话收起，下次打开重新出现。 -->
+  <div class="guide-hint" id="guideHint" role="status">
+    <span class="guide-hint-ico">${ic('glasses')}</span>
+    <span class="guide-hint-copy"><b>第一次来安星？</b><small>5 步看懂真实定位 · 真实地点 · 分级求救</small></span>
+    <button class="guide-hint-go" data-action="open-guide">查看</button>
+    <button class="guide-hint-x" data-action="dismiss-guide-hint" aria-label="关闭引导提示">${ic('close')}</button>
+  </div>
+
   <div class="risk-popover" id="riskPopover">
     <div class="rp-head"><b>附近夜行提示</b><button data-action="close-risk" aria-label="关闭夜行提示并隐藏点位">${ic('close')}</button></div>
     <div class="risk-item"><span class="risk-dot amber"></span><span><b>优先选择有路灯的主路</b><small>照明信息来自公开地图与路线估算</small></span></div>

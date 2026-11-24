@@ -314,7 +314,7 @@
     /* 「我的 → 使用指南」是显式入口，任何时候都必须能打开，
        不受"已看过/已关闭"状态影响；打开时收起底部提示栏避免重叠。 */
     XA.guideShown = true;
-    var hint = XA.$('#guideHint'); if (hint) hint.remove();
+    var hint = XA.$('#guideHint'); if (hint) hint.classList.add('is-hidden');
     var phone = XA.$('#phone'); if (!phone) return;
     var old = XA.$('#guideLayer'); if (old) old.remove();
     phone.insertAdjacentHTML('beforeend', '<div class="guide-layer" id="guideLayer"><div class="guide-card"><span class="guide-step" id="guideStep">1 / ' + GUIDE_STEPS.length + '</span><div id="guideBody"></div><div class="guide-actions"><button data-action="skip-guide">跳过</button><button class="primary-btn" data-action="next-guide" id="guideNext">下一步</button></div></div></div>');

@@ -1453,3 +1453,12 @@ html[data-scheme="light"] .loc-status{background:linear-gradient(135deg,rgba(255
 html[data-scheme="light"] .poi-suggest .poi-group{background:rgba(250,252,255,.96);border-bottom-color:rgba(20,32,46,.08)}
 html[data-scheme="light"] .poi-suggest .poi-sug-item{border-bottom-color:rgba(20,32,46,.07)}
 html[data-scheme="light"] .poi-suggest .poi-sug-item em{color:#0d8f76}
+
+
+/* =========================================================
+   使用教程入口（静态 DOM）与看完后的关闭提示
+   ========================================================= */
+.guide-hint.is-hidden{display:none!important}
+/* 关闭提示：停留约 3 秒，再用较长时间缓慢淡出（隐去） */
+.toast.toast--slow-fade{transition:opacity 1.15s ease,transform 1.15s ease}
+.toast.toast--slow-fade:not(.show){opacity:0;transform:translate(-50%,14px)}
