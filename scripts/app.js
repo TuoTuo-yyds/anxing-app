@@ -1,14 +1,11 @@
 /* 演示版全局规则：每次打开 APP 重置演示状态
-   清空 xa_ 前缀本地缓存（登录 / 实名 / 联系人 / 路线 / 设置 / 浏览记录）。
-   例外：xa_guide_v3（使用引导「已看过」标记）必须保留，
-   否则用户看完教程后刷新，引导提示栏会反复出现。 */
+   清空所有 xa_ 前缀本地缓存（登录 / 实名 / 引导 / 联系人 / 路线 / 设置 / 浏览记录），
+   保证每次打开底部都重新出现「使用教程」入口。 */
 (function () {
   try {
     var keys = [];
     for (var i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
-    keys.forEach(function (k) {
-      if (k && k.indexOf('xa_') === 0 && k !== 'xa_guide_v3') localStorage.removeItem(k);
-    });
+    keys.forEach(function (k) { if (k && k.indexOf('xa_') === 0) localStorage.removeItem(k); });
   } catch (e) {}
   try { sessionStorage.clear(); } catch (e) {}
 })();

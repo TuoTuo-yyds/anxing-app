@@ -344,9 +344,8 @@
     clearGuideHl();
     if (XA._guideResize) { window.removeEventListener('resize', XA._guideResize); XA._guideResize = null; }
     var l = XA.$('#guideLayer'); if (l) l.remove();
-    /* 看完 / 跳过教程后，底部引导提示栏一并关闭：
-       持久化「已看过」→ 刷新不再自动出现；明确提示可随时从「我的 → 使用指南」重新打开。 */
-    if (XA.markGuideSeen) XA.markGuideSeen();
+    /* 看完 / 跳过教程后，底部引导提示栏本次收起，
+       并明确提示可随时从「我的 → 使用指南」重新打开；下次打开会重新出现。 */
     if (XA.dismissGuideHint) XA.dismissGuideHint();
   }
 
