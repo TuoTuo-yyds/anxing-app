@@ -1,0 +1,1453 @@
+/* 旧版能力移植：真实地图导航 / 主题设定 / 登录 / 加载流程
+   仅复用旧版逻辑，界面与文案保持新版安星设计。 */
+(function () {
+  var PHOTON = 'https://photon.komoot.io/api/';
+  var OSRM = 'https://router.project-osrm.org/route/v1/';
+  var TILE = 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}';
+  var TILE_SAT = 'https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}';
+  /* 演示固定起点：湖北美术学院藏龙岛校区（OSM 实测 WGS84 30.3942219, 114.413263）
+     位于藏龙岛陆地，不再落到汤逊湖水域；周边终点也都在校园附近陆地 */
+  var DEFAULT = { lat: 30.3942219, lng: 114.413263, name: '湖北美术学院藏龙岛校区' };
+  var DESTS = {
+    '藏龙东街地铁站': { lat: 30.3978, lng: 114.4250, name: '藏龙东街地铁站' },
+    '栗庙路夜市': { lat: 30.3920, lng: 114.4080, name: '栗庙路夜市' },
+    '藏龙岛湿地公园': { lat: 30.3880, lng: 114.4170, name: '藏龙岛湿地公园' },
+    '湖北美术学院南门': { lat: 30.3930, lng: 114.4142, name: '湖北美术学院南门' },
+    '光谷广场': { lat: 30.5067, lng: 114.4019, name: '光谷广场' },
+    '家': { lat: 30.3990, lng: 114.4100, name: '家' }
+  };
+  var RECOMMENDS = [
+    { name: '藏龙岛派出所 · 栗庙路警务站', cat: '安全守护 · 24 小时开放', score: '安全 98', icon: 'shield', safe: true, lat: 30.3937, lng: 114.4102 },
+    { name: '湖北美术学院 · 藏龙岛校区南门', cat: '校园入口 · 照明良好', score: '4.9 分', icon: 'navigation', lat: 30.3930, lng: 114.4142 },
+    { name: '藏龙岛商业街', cat: '美食购物 · 人流充足', score: '4.8 分', icon: 'pin', lat: 30.3918, lng: 114.4078 },
+    { name: '栗庙路 24 小时便利店', cat: '夜间营业 · 可作求助点', score: '4.7 分', icon: 'pin', lat: 30.3928, lng: 114.4110 },
+    { name: '地铁 2 号线藏龙东街站', cat: '交通枢纽 · 监控密集', score: '安全 94', icon: 'shield', safe: true, lat: 30.3978, lng: 114.4250 }
+  ];
+  /* 守护点位不再是固定虚假坐标：以当前定位为中心，在周边 70~300 m 随机生成
+     每次打开或重新定位都会重新生成（数量固定 10 个，不额外新增） */
+  var POINTS = [];
+  function makePoints() {
+    var types = ['lamp', 'lamp', 'lamp', 'lamp', 'cam', 'cam', 'safe', 'safe', 'risk', 'risk'];
+    var warns = { 0: '路灯损坏 · 已报修', 5: '监控失效 · 维修中', 8: '照明不足 · 建议绕行主路' };
+    /* 十个扇区各一个点、扇区内随机抖动且整体角度随机：既随机又不扎堆，文字气泡不互相压住 */
+    var step = Math.PI * 2 / types.length;
+    var offset = Math.random() * Math.PI * 2;
+    POINTS = types.map(function (t, i) {
+      var ang = offset + i * step + (Math.random() - .5) * step * .5;
+      var r = 0.0008 + Math.random() * 0.0019;
+      return { type: t, dLat: Math.sin(ang) * r, dLng: Math.cos(ang) * r, warn: warns[i] || '' };
+    });
+  }
+  makePoints();
+  /* 点位随机方案每 5 分钟才刷新一次，避免实时定位回调造成点位频繁跳动；
+     期间位置变化只把现有点位整体平移到新中心。 */
+  var POINT_REFRESH_MS = 5 * 60 * 1000;
+  var lastPointRefresh = Date.now();
+  XA.refreshRiskPoints = function (force) {
+    var now = Date.now();
+    if (!force && now - lastPointRefresh < POINT_REFRESH_MS) return;
+    lastPointRefresh = now;
+    makePoints();
+    var c = pointCenter();
+    [XA.$('.home-map'), XA.$('.route-map'), XA.$('.nav-map')].forEach(function (el) {
+      var m = el && el._xaMap;
+      if (m) { addMeLayers(m, c); addPoints(m, c); }
+    });
+  };
+  setInterval(function () { XA.refreshRiskPoints(true); }, POINT_REFRESH_MS);
+  var LTYPE = { lamp: '路灯', cam: '监控', safe: '安全点', risk: '照明不足' };
+  var LCOLOR = { lamp: '#ffc46b', cam: '#8fb8ff', safe: '#7ff0d4', risk: '#ff5b52' };
+
+  var geoStart = [DEFAULT.lat, DEFAULT.lng];
+  var curRoutes = [], destPoint = null, navWatch = null, geoReady = false, loginShown = false;
+  var mapMode = '2d', baseMap = 'standard';
+  XA.homeState = 'default';
+
+  function setHomeState(state) {
+    XA.homeState = state;
+    window.scrollTo(0, 0);
+    var phone = XA.$('#phone');
+    if (phone) phone.scrollTop = 0;
+    XA.$$('.screen').forEach(function (el) { el.scrollTop = 0; });
+    var home = XA.$('[data-screen="home"]');
+    if (!home) return;
+    home.classList.remove('state-default', 'state-route', 'state-nav');
+    home.classList.add('state-' + state);
+    XA.$('#phone').classList.remove('no-tabbar');
+    if (state === 'default') {
+      var search = XA.$('.home-search [data-destination]');
+      if (search) search.textContent = XA.t ? XA.t('searchHint') : '搜索目的地、公交站';
+      var panel = XA.$('#routePanel');
+      if (panel) panel.classList.remove('expanded');
+    }
+    if (state === 'route') syncPanel();
+  }
+  function syncPanel() {
+    var phone = XA.$('#phone');
+    if (phone) phone.scrollTop = 0;
+    var r = curRoutes[0];
+    if (!r) return;
+    var set = function (sel, v) { var el = XA.$(sel); if (el) el.textContent = v; };
+    set('#rpScore', r.safety);
+    set('#rpLamp', r.lamp + '%');
+    set('#rpCam', r.cam + ' 处');
+    var sw = XA.$('#aiSwitch'), txt = XA.$('#aiStateText');
+    if (sw) sw.classList.toggle('on', !!XA.settings.aiCompanion);
+    if (txt) txt.textContent = XA.settings.aiCompanion ? '开启：语音陪伴 / 实时播报路况风险' : '关闭：导航静音，无 AI 互动';
+  }
+  function showRoutePanel() {
+    setHomeState('route');
+    var el = XA.$('.home-map');
+    if (el && el._xaMap) drawRoutes(el._xaMap);
+    syncPanel();
+  }
+  function resetHome() {
+    setHomeState('default');
+    var el = XA.$('.home-map');
+    if (el && el._xaMap && el._xaMap._xaRoutes) {
+      el._xaMap._xaRoutes.forEach(function (l) { el._xaMap.removeLayer(l); });
+      el._xaMap._xaRoutes = [];
+    }
+  }
+  function applyMapMode() {
+    document.body.classList.toggle('map-3d', mapMode === '3d');
+    var el = XA.$('.home-map'), m = el && el._xaMap;
+    if (!m) return;
+    Object.keys(m._layers).forEach(function (k) {
+      var layer = m._layers[k];
+      if (layer && layer._url) layer.setUrl(baseMap === 'satellite' ? TILE_SAT : TILE);
+    });
+  }
+
+  function wgs84ToGcj02(lat, lng) {
+    var outOfChina = !(lng > 73.66 && lng < 135.05 && lat > 3.86 && lat < 53.55);
+    if (outOfChina) return [lat, lng];
+    var a = 6378245.0, ee = 0.00669342162296594323;
+    function transLat(x, y) {
+      var r = -100 + 2 * x + 3 * y + .2 * y * y + .1 * x * y + .2 * Math.sqrt(Math.abs(x));
+      r += (20 * Math.sin(6 * x * Math.PI) + 20 * Math.sin(2 * x * Math.PI)) * 2 / 3;
+      r += (20 * Math.sin(y * Math.PI) + 40 * Math.sin(y / 3 * Math.PI)) * 2 / 3;
+      r += (160 * Math.sin(y / 12 * Math.PI) + 320 * Math.sin(y * Math.PI / 30)) * 2 / 3;
+      return r;
+    }
+    function transLng(x, y) {
+      var r = 300 + x + 2 * y + .1 * x * x + .1 * x * y + .1 * Math.sqrt(Math.abs(x));
+      r += (20 * Math.sin(6 * x * Math.PI) + 20 * Math.sin(2 * x * Math.PI)) * 2 / 3;
+      r += (20 * Math.sin(x * Math.PI) + 40 * Math.sin(x / 3 * Math.PI)) * 2 / 3;
+      r += (150 * Math.sin(x / 12 * Math.PI) + 300 * Math.sin(x / 30 * Math.PI)) * 2 / 3;
+      return r;
+    }
+    var dLat = transLat(lng - 105, lat - 35), dLng = transLng(lng - 105, lat - 35);
+    var radLat = lat / 180 * Math.PI, magic = Math.sin(radLat);
+    magic = 1 - ee * magic * magic;
+    var sqrtMagic = Math.sqrt(magic);
+    dLat = (dLat * 180) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
+    dLng = (dLng * 180) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
+    return [lat + dLat, lng + dLng];
+  }
+  function gcj() { return wgs84ToGcj02(geoStart[0], geoStart[1]); }
+  /* 点位与"我的位置"跟随实时定位；未定位时固定在武汉美院演示起点（路线起点仍用 geoStart） */
+  function pointCenter() {
+    var p = XA.position || DEFAULT;
+    return wgs84ToGcj02(p.real ? p.lat : DEFAULT.lat, p.real ? p.lng : DEFAULT.lng);
+  }
+  function accent() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--mint').trim() || '#7ff0d4';
+  }
+
+  /* ---------------- 设置 ---------------- */
+  XA.settings = {
+    theme: 'mint', appearance: 'dark', sosCd: 6, voice: true, follow: true, radar: true, acc: true, aiCompanion: true, routePref: 'night', sosDemo: false,
+    markers: {
+      lamp: { color: LCOLOR.lamp, shape: 'circle', glow: 7 },
+      cam: { color: LCOLOR.cam, shape: 'circle', glow: 6 },
+      safe: { color: LCOLOR.safe, shape: 'diamond', glow: 8 },
+      risk: { color: LCOLOR.risk, shape: 'circle', glow: 9 }
+    }
+  };
+  function loadSettings() {
+    try {
+      var s = JSON.parse(localStorage.getItem('xa_settings'));
+      if (s) {
+        XA.settings.theme = s.theme || 'mint';
+        XA.settings.appearance = s.appearance || 'dark';
+        XA.settings.sosCd = s.sosCd || 6;
+        if (typeof s.sosDemo === 'boolean') XA.settings.sosDemo = s.sosDemo;
+        if (s.routePref === 'time') XA.settings.routePref = 'time';
+        ['voice', 'follow', 'radar', 'acc', 'aiCompanion'].forEach(function (k) {
+          if (typeof s[k] === 'boolean') XA.settings[k] = s[k];
+        });
+        if (s.markers) Object.keys(XA.settings.markers).forEach(function (k) {
+          if (s.markers[k]) Object.assign(XA.settings.markers[k], s.markers[k]);
+        });
+      }
+    } catch (e) {}
+    applyTheme();
+    applyAppearance();
+  }
+  function saveSettings() {
+    try { localStorage.setItem('xa_settings', JSON.stringify(XA.settings)); } catch (e) {}
+  }
+  XA.saveSettings = saveSettings;
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', XA.settings.theme);
+    refreshMapLayers();
+  }
+  /* 深浅色：跟随系统 / 手动深色 / 手动浅色；地图底色与界面同步切换 */
+  var sysDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function applyAppearance() {
+    var mode = XA.settings.appearance || 'dark';
+    var scheme = mode === 'system' ? (sysDark && sysDark.matches ? 'dark' : 'light') : mode;
+    document.documentElement.setAttribute('data-scheme', scheme);
+    var label = XA.$('#appearanceLabel');
+    if (label) label.textContent = ({ system: '跟随设备系统', dark: '手动深色主题', light: '手动浅色主题' })[mode];
+    var m = XA.$('#homeMap') && XA.$('#homeMap')._xaMap;
+    if (m) setTimeout(function () { m.invalidateSize(); }, 60);
+  }
+  if (sysDark) {
+    var onSys = function () { if ((XA.settings.appearance || 'dark') === 'system') applyAppearance(); };
+    if (sysDark.addEventListener) sysDark.addEventListener('change', onSys);
+    else if (sysDark.addListener) sysDark.addListener(onSys);
+  }
+  /* 外观设置与守护类开关统一收进「设置」页，不再另开独立的「个性化管理」页面。
+     openSettings() 保留为统一重绘入口，供各事件委托复用，不再弹出 sheet。 */
+  function personalizeHtml() {
+    var s = XA.settings;
+    var themes = [['mint', '薄荷夜色'], ['amber', '琥珀暖光'], ['aurora', '星蓝守护']];
+    var modes = [['system', '跟随系统'], ['dark', '深色主题'], ['light', '浅色主题']];
+    var appearance = '<div class="seg">' + modes.map(function (t) {
+      return '<button data-appearance="' + t[0] + '" class="' + (s.appearance === t[0] ? 'on' : '') + '">' + t[1] + '</button>';
+    }).join('') + '</div>';
+    var theme = '<div class="seg">' + themes.map(function (t) {
+      return '<button data-theme-set="' + t[0] + '" class="' + (s.theme === t[0] ? 'on' : '') + '">' + t[1] + '</button>';
+    }).join('') + '</div>';
+    var markers = '';
+    Object.keys(LTYPE).forEach(function (k) {
+      var m = s.markers[k];
+      markers += '<div class="pz-marker"><div class="pz-marker-title">' + LTYPE[k] + '</div>' +
+        '<div class="color-row">' + [LCOLOR.lamp, LCOLOR.cam, LCOLOR.safe, LCOLOR.risk, '#ffffff'].map(function (c) {
+          return '<button class="color-dot ' + (m.color === c ? 'on' : '') + '" data-color="' + k + '" data-value="' + c + '" style="background:' + c + ';color:' + c + '"></button>';
+        }).join('') + '</div>' +
+        '<div class="seg">' + [['circle', '圆形'], ['square', '方形'], ['diamond', '菱形']].map(function (o) {
+          return '<button data-shape="' + k + '" data-value="' + o[0] + '" class="' + (m.shape === o[0] ? 'on' : '') + '">' + o[1] + '</button>';
+        }).join('') + '</div>' +
+        '<div class="seg">' + [[5, '微光'], [8, '标准'], [12, '强光']].map(function (o) {
+          return '<button data-glow="' + k + '" data-value="' + o[0] + '" class="' + (m.glow === o[0] ? 'on' : '') + '">' + o[1] + '</button>';
+        }).join('') + '</div></div>';
+    });
+    return { appearance: appearance, theme: theme, markers: markers };
+  }
+  function guardHtml() {
+    var s = XA.settings;
+    var rows = [
+      ['follow', '实时位置跟踪', '导航时地图自动跟随当前位置'],
+      ['radar', '雷达扫描', '显示 50 米安全扫描圈'],
+      ['acc', '定位精度显示', '在导航中显示 ± 米数'],
+      ['voice', '危险语音提醒', '接近照明不足区域时播报一句话']
+    ];
+    var html = '<div class="setting-line"><span><b>SOS 倒计时缓冲</b><small>按下 SOS 后自动报警前的可取消窗口</small></span></div>' +
+      '<div class="seg">' + [5, 6, 8].map(function (v) {
+        return '<button data-soscd="' + v + '" class="' + (s.sosCd === v ? 'on' : '') + '">' + v + ' 秒</button>';
+      }).join('') + '</div>';
+    rows.forEach(function (r) {
+      html += '<div class="setting-line"><span><b>' + r[1] + '</b><small>' + r[2] + '</small></span>' +
+        '<button class="toggle ' + (s[r[0]] ? 'on' : '') + '" data-toggle="' + r[0] + '"><i></i></button></div>';
+    });
+    return html;
+  }
+  function openSettings() {
+    var p = personalizeHtml();
+    var a = XA.$('#pzAppearance'), t = XA.$('#pzTheme'), m = XA.$('#pzMarkers');
+    if (a) a.innerHTML = p.appearance;
+    if (t) t.innerHTML = p.theme;
+    if (m) m.innerHTML = p.markers;
+    var g = XA.$('#guardSettings');
+    if (g) g.innerHTML = guardHtml();
+    XA.refreshGeoState();
+  }
+  /* 真实地图服务状态：设置页显示 Key 是否已配置、定位是否已授权 */
+  XA.refreshGeoState = function () {
+    var k = XA.$('#geoKeyState');
+    if (k) k.textContent = (XA.Geo && XA.Geo.hasKey())
+      ? (XA.Geo.isBuiltin() ? '已内置 · 米级精确坐标' : '自定义服务 · 米级精确坐标')
+      : '演示精度';
+    var l = XA.$('#geoLocState');
+    if (l) {
+      var p = XA.position || {};
+      l.textContent = p.real
+        ? ('已定位 · 精度 ±' + Math.round(p.acc || 0) + ' m' + (p.address ? ' · ' + p.address : ''))
+        : '点此获取 GPS / 北斗实时定位';
+    }
+  };
+  XA.actions.settings = function () { XA.go('settings'); openSettings(); };
+  /* 保留「我的」页画板图标作为唯一快捷入口，直接落到设置页的个性化分区 */
+  XA.actions['settings-appearance'] = function () { XA.go('settings'); openSettings(); };
+  XA.actions['route-pref'] = function () {
+    var s = XA.settings;
+    XA.openSheet('<h3>路线偏好</h3><div class="sheet-sub">决定路线列表的默认排序方式，保存在本机</div>' +
+      '<div class="seg">' +
+      '<button data-routepref="night" class="' + (s.routePref !== 'time' ? 'on' : '') + '">夜行优先 · 安全第一</button>' +
+      '<button data-routepref="time" class="' + (s.routePref === 'time' ? 'on' : '') + '">时间优先 · 最快到达</button>' +
+      '</div>');
+  };
+  /* 风险点位默认隐藏；状态标签、按钮高亮与点位本体始终同步（可见性 / 一致性） */
+  function syncPointsState() {
+    var hidden = document.body.classList.contains('points-hidden');
+    var label = XA.$('#pointsState');
+    if (label) {
+      label.textContent = hidden ? '风险点位已隐藏' : '风险点位已显示';
+      label.classList.toggle('on', !hidden);
+    }
+    var btn = XA.$('[data-action="risk-popover"]');
+    if (btn) {
+      btn.classList.toggle('active', !hidden);
+      btn.setAttribute('aria-label', hidden ? '查看风险点位与提示' : '隐藏风险点位与提示');
+    }
+  }
+  XA.syncPointsState = syncPointsState;
+  XA.actions['risk-popover'] = function () {
+    var hidden = document.body.classList.toggle('points-hidden');
+    var p = XA.$('#riskPopover'), m = XA.$('#mapModePop');
+    if (m) m.classList.remove('open');
+    if (p) p.classList.toggle('open', !hidden);
+    syncPointsState();
+    XA.toast(hidden ? '风险点位已隐藏 · 再点查看' : '已显示周边风险点位与提示', 'info');
+  };
+  XA.actions['close-risk'] = function () {
+    var p = XA.$('#riskPopover'); if (p) p.classList.remove('open');
+    document.body.classList.add('points-hidden');   // 关闭提示即恢复隐藏，避免状态与视觉不一致
+    syncPointsState();
+    XA.toast('风险点位已隐藏 · 可随时再点查看', 'info');
+  };
+  XA.actions.recenter = function () { if (XA.startLiveLocation) XA.startLiveLocation(false); };
+  XA.actions['guard-settings'] = function () { XA.go('guard'); openSettings(); };
+  XA.actions['ai-toggle'] = function () {
+    XA.settings.aiCompanion = !XA.settings.aiCompanion;
+    saveSettings(); syncPanel();
+    XA.toast(XA.settings.aiCompanion ? 'AI 全程陪伴已开启' : 'AI 全程陪伴已关闭 · 导航静音');
+  };
+  XA.actions['open-drawer'] = function () { var d = XA.$('#sideDrawer'); if (d) d.classList.add('open'); };
+  XA.actions['close-drawer'] = function () { var d = XA.$('#sideDrawer'); if (d) d.classList.remove('open'); };
+  XA.actions['open-route'] = function () {
+    XA.actions['close-drawer']();
+    XA.go('route');
+  };
+  XA.actions['open-ar'] = function () {
+    XA.actions['close-drawer']();
+    XA.go('ar');
+  };
+
+  /* ---------------- 登录 ---------------- */
+  XA.account = { loggedIn: false, phone: '', nickname: '安星用户', code: '' };
+  XA.privacy = { allowHomepage: true, hidePurchases: false, location: true, analytics: false };
+  function loadPrivacy() {
+    try {
+      var p = JSON.parse(localStorage.getItem('xa_privacy'));
+      if (p) Object.assign(XA.privacy, p);
+    } catch (e) {}
+  }
+  function savePrivacy() {
+    try { localStorage.setItem('xa_privacy', JSON.stringify(XA.privacy)); } catch (e) {}
+  }
+  XA.savePrivacy = savePrivacy;
+  function loadAccount() {
+    try {
+      var a = JSON.parse(localStorage.getItem('xa_account'));
+      if (a) Object.assign(XA.account, a);
+    } catch (e) {}
+    renderAccount();
+  }
+  function saveAccount() {
+    try { localStorage.setItem('xa_account', JSON.stringify(XA.account)); } catch (e) {}
+  }
+  function renderAccount() {
+    var card = XA.$('[data-screen="profile"] .profile-card');
+    if (!card) return;
+    var en = XA.lang === 'en';
+    var name = card.querySelector('b'), sub = card.querySelector('small'), av = card.querySelector('.profile-avatar');
+    var item = card.querySelector('.level');
+    if (name) name.textContent = XA.account.loggedIn ? XA.account.nickname : (en ? 'Not signed in · Tap to sign in' : '未登录 · 点击登录');
+    if (sub) sub.textContent = XA.account.loggedIn ?
+      ((en ? 'Phone: ' : '手机号：') + XA.account.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') + (en ? ' · 3 nights guarded' : ' · 已连续守护 3 晚')) :
+      (en ? 'Sign in to sync your night walks · Tap to sign in' : '登录后同步夜行数据 · 点击登录');
+    if (av) av.textContent = XA.account.loggedIn ? XA.account.nickname.slice(0, 1) : '安';
+    if (item) item.textContent = XA.account.loggedIn ? (en ? 'Night Walker Lv.3' : '夜行者 Lv.3') : (en ? 'Guest mode' : '游客模式');
+  }
+  XA.renderAccount = renderAccount;
+  function buildLogin() {
+    if (XA.$('.login-screen')) return;
+    var el = document.createElement('div');
+    el.className = 'login-screen';
+    el.id = 'loginScreen';
+    el.innerHTML = '<img class="login-logo" src="assets/splash-logo.png" alt="安星">' +
+      '<div class="login-title">欢迎回到安星</div>' +
+      '<div class="login-sub">登录后同步你的安全路线、紧急联系人<br>与夜间守护记录。</div>' +
+      '<div class="login-form">' +
+      '<label class="login-label">手机号</label>' +
+      '<input class="login-input" id="loginPhone" type="tel" maxlength="11" inputmode="numeric" placeholder="请输入 11 位手机号" value="13800138000">' +
+      '<label class="login-label">验证码</label>' +
+      '<div class="login-code-row"><input class="login-input" id="loginCode" type="text" maxlength="4" inputmode="numeric" placeholder="4 位验证码">' +
+      '<button class="code-btn" id="loginCodeBtn" data-action="send-code">获取验证码</button></div>' +
+      '<p class="login-code-hint" id="loginCodeHint">演示验证码会在此提示并自动填入，无需手动输入</p>' +
+      '<button class="login-btn" data-action="do-login">登录并继续</button>' +
+      '<button class="login-skip" data-action="skip-login">暂时跳过，先看看</button>' +
+      '</div>' +
+      '<div class="login-foot">验证码为演示数据，获取后自动填入输入框<br>安星不会上传你的手机号</div>';
+    /* 易学性 / 效率：遵循表单惯例，输入框内按 Enter 即可直接登录 */
+    el.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      if (!e.target.closest || !e.target.closest('.login-input')) return;
+      e.preventDefault();
+      XA.actions['do-login']();
+    });
+    XA.$('#phone').appendChild(el);
+  }
+  function openLogin() {
+    buildLogin();
+    XA.$('#loginScreen').classList.add('open');
+    resetCodeBtn();
+  }
+  /* 用户控制 + 易学性：引导改为非阻断提示，由用户点「查看」才进入；
+     不再强制弹层、不再在进入功能页时自动打断用户 */
+  XA.guidePending = false;
+  XA.guideShown = false;
+  XA.guideDismissed = false;
+  function hideGuideHint() { var h = XA.$('#guideHint'); if (h) h.remove(); }
+  function showGuideHint() {
+    if (XA.$('#guideHint') || XA.guideDismissed) return;
+    var phone = XA.$('#phone'); if (!phone) return;
+    var hint = document.createElement('div');
+    hint.className = 'guide-hint';
+    hint.id = 'guideHint';
+    hint.setAttribute('role', 'status');
+    hint.innerHTML = '<span class="guide-hint-ico">' + ic('glasses') + '</span>' +
+      '<span class="guide-hint-copy"><b>第一次来安星？</b><small>30 秒了解夜行守护怎么用</small></span>' +
+      '<button class="guide-hint-go" data-action="open-guide">查看</button>' +
+      '<button class="guide-hint-x" data-action="dismiss-guide-hint" aria-label="关闭引导提示">' + ic('close') + '</button>';
+    phone.appendChild(hint);
+  }
+  XA.maybeStartGuide = function () {
+    if (!XA.guidePending || XA.guideShown || XA.guideDismissed) return;
+    if (XA.current !== 'home') return;                       // 不打断用户正在使用的功能页
+    var login = XA.$('#loginScreen');
+    if (login && login.classList.contains('open')) return;   // 登录未完成，绝不出现
+    XA.guidePending = false;
+    XA.guideShown = true;
+    showGuideHint();
+  };
+  XA.actions['dismiss-guide-hint'] = function () {
+    hideGuideHint();
+    XA.guidePending = false;
+    XA.guideDismissed = true;
+    XA.toast('已关闭引导提示 · 可在「我的 → 使用指南」随时查看', 'info');
+  };
+  function closeLogin() {
+    var el = XA.$('#loginScreen');
+    if (el) el.classList.remove('open');
+    loginShown = true;
+    try { localStorage.setItem('xa_login_seen', '1'); } catch (e) {}
+    /* 登录完成（或跳过）后再申请位置权限，用户同意后才取真实实时位置 */
+    if (XA.startLiveLocation) XA.startLiveLocation(true);
+    XA.guidePending = true;
+    setTimeout(function () { XA.maybeStartGuide(); }, 3600);  // 兜底：停留在首页也只给出非阻断提示
+  }
+  function maybeShowLogin() {
+    var seen = false;
+    try { seen = localStorage.getItem('xa_login_seen') === '1'; } catch (e) {}
+    if (!loginShown && !seen && !XA.account.loggedIn) setTimeout(openLogin, 420);
+  }
+  XA.actions['open-login'] = function () {
+    if (XA.account.loggedIn) {
+      XA.openSheet('<h3>账号与资料</h3><div class="sheet-sub">登录状态保存在本机，可随时修改昵称</div>' +
+        '<div class="acct-field"><label>当前昵称</label><input class="acct-field-input" value="' + XA.account.nickname + '" readonly></div>' +
+        '<div class="acct-field"><label>新昵称</label><input class="login-input" id="acctNewName" maxlength="12" placeholder="最多 12 个字"></div>' +
+        '<button class="primary-btn" data-action="save-nickname">保存昵称</button>' +
+        '<button class="login-skip" data-action="logout-confirm">退出登录</button>');
+    } else openLogin();
+  };
+  function resetCodeBtn() {
+    clearInterval(XA._codeTimer);
+    var b = XA.$('#loginCodeBtn');
+    if (b) { b.disabled = false; b.textContent = '获取验证码'; }
+  }
+  XA.actions['send-code'] = function () {
+    var phoneInput = XA.$('#loginPhone'), codeInput = XA.$('#loginCode'), hint = XA.$('#loginCodeHint');
+    var p = ((phoneInput || {}).value || '').trim();
+    if (!/^1\d{10}$/.test(p)) { XA.toast('手机号需为 1 开头的 11 位数字，请修改后重试', 'error'); return; }
+    XA.account.phone = p;
+    XA.account.code = String(Math.floor(1000 + Math.random() * 9000));
+    if (codeInput) codeInput.value = XA.account.code;   // 演示码自动填入，保证登录流程可一键走通
+    if (hint) hint.textContent = '演示验证码：' + XA.account.code + '（已自动填入，直接点「登录并继续」即可）';
+    /* 反馈：按钮显示发送中与倒计时；容错：禁用期间防止重复发送 */
+    var btn = XA.$('#loginCodeBtn');
+    if (btn) {
+      btn.disabled = true;
+      var left = 10;
+      btn.textContent = '已发送 ' + left + 's';
+      clearInterval(XA._codeTimer);
+      XA._codeTimer = setInterval(function () {
+        left--;
+        if (left <= 0) resetCodeBtn();
+        else btn.textContent = '已发送 ' + left + 's';
+      }, 1000);
+    }
+    XA.toast('验证码已发送（演示）：' + XA.account.code + ' · 已自动填入', 'success');
+  };
+  XA.actions['do-login'] = function () {
+    var p = ((XA.$('#loginPhone') || {}).value || '').trim();
+    var c = ((XA.$('#loginCode') || {}).value || '').trim();
+    if (!/^1\d{10}$/.test(p)) { XA.toast('手机号需为 1 开头的 11 位数字，请修改后重试', 'error'); return; }
+    if (!XA.account.code) { XA.toast('请先点击「获取验证码」，演示码会自动填入', 'warn'); return; }
+    if (!/^\d{4}$/.test(c)) { XA.toast('请输入 4 位验证码，或重新获取演示码', 'error'); return; }
+    if (c !== XA.account.code) { XA.toast('验证码不正确，请重新点击「获取验证码」', 'error'); return; }
+    XA.account.loggedIn = true;
+    XA.account.phone = p;
+    XA.account.nickname = XA.account.nickname || '安星用户';
+    XA.account.code = '';
+    resetCodeBtn();
+    saveAccount(); renderAccount(); closeLogin();
+    XA.go('home', true);   // 登录完成直接回到主页
+    XA.toast('登录成功 · 夜行数据已同步', 'success');
+  };
+  XA.actions['skip-login'] = function () { closeLogin(); XA.toast('已跳过登录 · 可随时在“我的”中登录'); };
+  XA.actions['logout-account'] = function () {
+    XA.account.loggedIn = false; XA.account.phone = ''; XA.account.code = '';
+    saveAccount(); renderAccount(); XA.closeModal(); XA.toast('已退出登录');
+  };
+  XA.actions['account-security'] = function () {
+    XA.openSheet('<h3 data-i18n="accountSecurity">账号与安全</h3><div class="sheet-sub" data-i18n="accountSecuritySub">登录方式、设备与紧急访问</div>' +
+      '<div class="option-row">' + ic('phone') + '<span><b data-i18n="accountLogin">登录方式</b><small>' +
+      (XA.account.loggedIn ? (XA.account.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') + ' · 验证码登录') : '未登录 · 可随时登录') + '</small></span></div>' +
+      '<div class="option-row">' + ic('lock') + '<span><b data-i18n="accountDevice">已配对设备</b><small>安星 AR 眼镜 XA-0281 · 本地加密</small></span></div>' +
+      '<div class="option-row">' + ic('shield') + '<span><b>紧急联系人</b><small>3 位 · 仅报警或长按求助时通知</small></span></div>' +
+      '<button class="primary-btn" data-action="open-login" data-i18n="accountChange">管理</button>');
+  };
+  XA.actions['switch-account'] = function () {
+    XA.openSheet('<h3 data-i18n="switchAccount">切换账号</h3><div class="sheet-sub" data-i18n="switchAccountSub">可使用其他手机号登录</div>' +
+      '<div class="option-row">' + ic('users') + '<span><b>' + (XA.account.loggedIn ? XA.account.nickname : '当前未登录') +
+      '</b><small>' + (XA.account.loggedIn ? XA.account.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') : '跳过登录模式') + '</small></span></div>' +
+      '<button class="primary-btn" data-action="switch-login" data-i18n="continueSwitch">继续切换</button>');
+  };
+  XA.actions['switch-login'] = function () {
+    XA.account.loggedIn = false; XA.account.code = '';
+    saveAccount(); renderAccount();
+    XA.closeModal();
+    setTimeout(function () {
+      openLogin();
+      setTimeout(function () { var p = XA.$('#loginPhone'); if (p) p.value = XA.account.phone || ''; }, 80);
+    }, 180);
+  };
+  XA.actions['save-nickname'] = function () {
+    var v = ((XA.$('#acctNewName') || {}).value || '').trim();
+    if (!v || v.length > 12) { XA.toast('请输入 1–12 个字的昵称'); return; }
+    XA.account.nickname = v; saveAccount(); renderAccount(); XA.closeModal(); XA.toast('昵称已更新');
+  };
+
+  /* ---------------- 地图 ---------------- */
+  function setupMap(el, center, zoom) {
+    if (!el || typeof L === 'undefined') return null;
+    if (el.classList && el.classList.contains('map-embed')) return null; // 首页已用高德完整地图，不再叠加 Leaflet
+    if (el._xaMap) return el._xaMap;
+    var m = L.map(el, { zoomControl: false, attributionControl: false }).setView(center, zoom || 16);
+    L.tileLayer(TILE, { subdomains: '1234', maxZoom: 19 }).addTo(m);
+    el._xaMap = m;
+    setTimeout(function () { m.invalidateSize(); }, 80);
+    return m;
+  }
+  function meIcon() {
+    return L.divIcon({
+      className: 'xa-me-wrap', iconSize: [40, 40], iconAnchor: [20, 20],
+      html: '<div class="xa-me-icon"><svg viewBox="0 0 40 40"><path d="M20 2 L33 34 L20 27 L7 34 Z" fill="#3b9dff" stroke="#ffffff" stroke-width="2.4" stroke-linejoin="round"/></svg></div>'
+    });
+  }
+  function pointIcon(type) {
+    var s = XA.settings.markers[type];
+    var shape = s.shape === 'square' ? 'border-radius:3px' : (s.shape === 'diamond' ? 'border-radius:2px;transform:rotate(45deg)' : 'border-radius:50%');
+    return L.divIcon({
+      className: 'xa-point-wrap', iconSize: [14, 14], iconAnchor: [7, 7],
+      html: '<div class="xa-point" style="background:' + s.color + ';box-shadow:0 0 ' + s.glow + 'px ' + s.color + ';' + shape + '"></div>'
+    });
+  }
+  function addMeLayers(m, center) {
+    if (!m) return;
+    var c = center || gcj();
+    if (!m._xaMe) {
+      m._xaMe = L.marker(c, { icon: meIcon() }).addTo(m);
+      m._xaRadar = L.circle(c, { radius: 50, color: '#3b9dff', weight: 1.4, opacity: .65, fillColor: '#3b9dff', fillOpacity: .09, interactive: false }).addTo(m);
+      m._xaSweep = L.marker(c, {
+        icon: L.divIcon({ className: 'xa-sweep-wrap', iconSize: [110, 110], iconAnchor: [55, 55], html: '<div class="xa-sweep"></div>' }),
+        interactive: false
+      }).addTo(m);
+    } else {
+      m._xaMe.setLatLng(c); m._xaRadar.setLatLng(c); m._xaSweep.setLatLng(c);
+    }
+    if (!XA.settings.radar) {
+      if (m._xaRadar) m._xaRadar.setStyle({ opacity: 0, fillOpacity: 0 });
+      if (m._xaSweep) m._xaSweep.setOpacity(0);
+    }
+  }
+  function addPoints(m, center) {
+    if (!m) return;
+    if (m._xaPoints) m._xaPoints.forEach(function (p) { m.removeLayer(p); });
+    m._xaPoints = [];
+    var c = center || pointCenter();
+    POINTS.forEach(function (p) {
+      var marker = L.marker([c[0] + p.dLat, c[1] + p.dLng], { icon: pointIcon(p.type), interactive: false }).addTo(m);
+      marker._xaType = p.type;
+      m._xaPoints.push(marker);
+      if (p.warn) {
+        var tip = L.tooltip({ permanent: true, direction: 'right', className: 'xa-warn-tip', offset: [9, 0] })
+          .setLatLng([c[0] + p.dLat, c[1] + p.dLng]).setContent(p.warn).addTo(m);
+        m._xaPoints.push(tip);
+      }
+    });
+  }
+  function refreshMapLayers() {
+    [XA.$('.home-map'), XA.$('.route-map'), XA.$('.nav-map')].forEach(function (el) {
+      var m = el && el._xaMap;
+      if (!m) return;
+      if (m._xaMe) { m.removeLayer(m._xaMe); m._xaMe = null; }
+      if (m._xaRadar) { m.removeLayer(m._xaRadar); m._xaRadar = null; }
+      if (m._xaSweep) { m.removeLayer(m._xaSweep); m._xaSweep = null; }
+      addMeLayers(m, pointCenter());
+    });
+  }
+  function initHomeMap() {
+    var el = XA.$('.home-map');
+    if (!el) return;
+    var m = setupMap(el, pointCenter(), 16);
+    if (!m) return;
+    addMeLayers(m, pointCenter());
+    addPoints(m, pointCenter());
+    el.classList.add('map-ready');
+  }
+  function initRouteMap() {
+    var el = XA.$('.route-map');
+    if (!el) return;
+    var m = setupMap(el, pointCenter(), 15);
+    if (!m) return;
+    addMeLayers(m, pointCenter());
+    addPoints(m, pointCenter());
+    el.classList.add('map-ready');
+    if (curRoutes.length) drawRoutes(m);
+  }
+  function initNavMap() {
+    var el = XA.$('.nav-map');
+    if (!el) return;
+    var m = setupMap(el, pointCenter(), 17);
+    if (!m) return;
+    addMeLayers(m, pointCenter());
+    addPoints(m, pointCenter());
+    el.classList.add('map-ready');
+    if (curRoutes.length) drawRoutes(m, true);
+  }
+  /* 单一实时定位数据源：所有页面与 SOS 都读 XA.position */
+  XA.position = { lat: DEFAULT.lat, lng: DEFAULT.lng, acc: 0, real: false };
+  var homeWatch = null;
+  function publishPosition(lat, lng, acc, real) {
+    geoReady = !!real;
+    XA.position = { lat: lat, lng: lng, acc: acc || 0, real: !!real };
+    if (real) geoStart = [lat, lng];        // 授权后路线起点也跟随真实位置
+    var live = XA.$('#arNavLive');
+    if (live) live.textContent = real ? '实时定位已联动 · ±' + Math.round(acc || 8) + ' m' : '等待实时定位';
+    if (XA.onPositionChange) XA.onPositionChange(XA.position);
+    if (XA.refreshGeoState) XA.refreshGeoState();
+    updatePosition(lat, lng, acc);
+    /* 配置 Key 后，用官方逆地理编码把经纬度翻译成真实街道地址 */
+    if (real && XA.Geo && XA.Geo.hasKey()) {
+      XA.Geo.regeo(lat, lng).then(function (r) {
+        XA.position.address = r.formatted || '';
+        XA.position.city = r.city || '';
+        if (XA.onPositionChange) XA.onPositionChange(XA.position);
+      }).catch(function () {});
+    }
+  }
+  XA.requestLocation = function (cb) {
+    if (!navigator.geolocation) { cb(null); return; }
+    var done = false;
+    var timer = setTimeout(function () { if (!done) { done = true; cb(null); } }, 9000);
+    navigator.geolocation.getCurrentPosition(function (p) {
+      if (done) return; done = true; clearTimeout(timer);
+      publishPosition(p.coords.latitude, p.coords.longitude, p.coords.accuracy, true);
+      cb(XA.position);
+    }, function (e) {
+      if (done) return; done = true; clearTimeout(timer);
+      var m = e && e.code === 1 ? '定位权限被拒绝 · 请在系统设置中允许'
+            : e && e.code === 2 ? '暂时无法获取位置 · 请开启定位服务或到室外'
+            : '定位超时 · 可点「回到我的位置」重试';
+      XA.toast(m, 'warn');
+      cb(null);                                  // 保留上一次有效位置，不回落到固定城市
+    }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 });
+  };
+  /* 主动申请位置权限：用户同意后获取真实位置并持续跟随 */
+  XA.startLiveLocation = function (silent) {
+    if (!navigator.geolocation) { if (!silent) XA.toast('设备不支持定位 · 保持演示位置'); return; }
+    if (homeWatch !== null) { if (!silent) XA.toast('实时定位已开启 · 蓝色箭头正跟随你'); return; }
+    navigator.geolocation.getCurrentPosition(function (p) {
+      publishPosition(p.coords.latitude, p.coords.longitude, p.coords.accuracy, true);
+      startHomeWatch();
+      if (!silent) XA.toast('已开启实时定位 · 蓝色箭头将跟随你移动');
+      else XA.toast('实时定位已就绪 · 精度 ±' + Math.round(p.coords.accuracy || 0) + ' m', 'success');
+    }, function (e) {
+      var m = e && e.code === 1 ? '定位权限被拒绝 · 请在浏览器 / 系统设置中允许位置访问'
+            : e && e.code === 2 ? '暂时无法获取位置 · 请开启定位服务或到室外'
+            : '定位超时 · 可点「回到我的位置」重试';
+      XA.toast(m, 'warn');
+    }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 });
+  };
+  function startHomeWatch() {
+    if (!navigator.geolocation || homeWatch !== null) return;
+    homeWatch = navigator.geolocation.watchPosition(function (p) {
+      publishPosition(p.coords.latitude, p.coords.longitude, p.coords.accuracy, true);
+    }, function () {
+      XA.toast('定位未开启 · 可在系统设置开启后使用实时位置');
+    }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
+  }
+  function updatePosition(lat, lng, acc) {
+    /* 未授权定位时固定武汉美院演示起点；拿到实时位置则地图与点位一起跟随，不再偏移到湖里 */
+    var p = XA.position || { real: false };
+    var c = wgs84ToGcj02(p.real ? p.lat : DEFAULT.lat, p.real ? p.lng : DEFAULT.lng);
+    XA.refreshRiskPoints();   // 仅到 5 分钟周期才重新随机；本次按新中心平移现有点位
+    [XA.$('.home-map'), XA.$('.route-map'), XA.$('.nav-map')].forEach(function (el) {
+      var m = el && el._xaMap;
+      if (!m) return;
+      if (p.real && (el.classList.contains('home-map') || el.classList.contains('nav-map'))) m.setView(c, m.getZoom(), { animate: true });
+      addMeLayers(m, c);
+      addPoints(m, c);
+    });
+    if (XA.settings.acc) {
+      var tip = XA.$('.nav-map #turnSub');
+      if (tip) tip.textContent = '导航中 · 定位精度 ±' + Math.round(acc || 8) + 'm';
+    }
+    checkRisk(c);
+  }
+  function locate(silent) {
+    XA.requestLocation(function (p) {
+      if (!silent) XA.toast(p ? '已获取实时位置 · 精度 ±' + Math.round(p.acc || 8) + 'm' : '定位未开启 · 已显示概念演示位置');
+    });
+  }
+  function startWatch() {
+    if (!navigator.geolocation || navWatch) return;
+    navWatch = navigator.geolocation.watchPosition(function (p) {
+      publishPosition(p.coords.latitude, p.coords.longitude, p.coords.accuracy, true);
+    }, function () {}, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
+  }
+  function stopWatch() {
+    if (navWatch) { navigator.geolocation.clearWatch(navWatch); navWatch = null; }
+  }
+  var warned = false;
+  function checkRisk(c) {
+    if (!XA.settings.voice || warned || !('speechSynthesis' in window)) return;
+    var riskPoints = POINTS.filter(function (p) { return p.type === 'risk'; }).map(function (p) {
+      return [c[0] + p.dLat, c[1] + p.dLng];   // 与地图上随机生成的点位一致
+    });
+    var hit = riskPoints.some(function (r) { return Math.abs(c[0] - r[0]) < 0.00035 && Math.abs(c[1] - r[1]) < 0.00035; });
+    if (hit) {
+      warned = true;
+      var u = new SpeechSynthesisUtterance('前方照明不足，建议走主干道');
+      u.lang = 'zh-CN'; u.rate = 1;
+      speechSynthesis.speak(u);
+      XA.toast('前方照明不足，建议走主干道');
+    }
+  }
+  window.addEventListener('deviceorientation', function (e) {
+    var h = null;
+    if (typeof e.webkitCompassHeading === 'number') h = e.webkitCompassHeading;
+    else if (e.alpha != null) h = (360 - e.alpha) % 360;
+    if (h == null) return;
+    XA.$$('.xa-me-icon').forEach(function (el) { el.style.setProperty('--heading', h + 'deg'); });
+  });
+
+  /* ---------------- 路线规划 ---------------- */
+  function assessRoute(r, idx) {
+    var distKm = r.distance / 1000, sec = r.duration;
+    var coords = (r.geometry && r.geometry.coordinates || []).map(function (c) { return [c[1], c[0]]; });
+    var turns = 0;
+    for (var i = 2; i < coords.length; i++) {
+      var a = coords[i - 2], b = coords[i - 1], c = coords[i];
+      var v1 = [b[0] - a[0], b[1] - a[1]], v2 = [c[0] - b[0], c[1] - b[1]];
+      if (Math.abs(v1[0] * v2[1] - v1[1] * v2[0]) > 0.00002) turns++;
+    }
+    var straight = turns / Math.max(distKm, 0.1);
+    var safety = Math.max(30, Math.min(96, Math.round(88 - straight * 6 - (idx === 0 ? 4 : 0) + (distKm > 3 ? 3 : 0))));
+    return {
+      coords: coords, distance: r.distance, seconds: sec, safety: safety,
+      time: Math.ceil(sec / 60), dist: distKm.toFixed(1),
+      lamp: Math.min(100, Math.max(40, Math.round(safety + 6 - (idx === 1 ? 12 : 0) - (idx === 2 ? 28 : 0)))),
+      cam: Math.max(1, Math.round(safety / 12)),
+      event: Math.max(0, Math.round((100 - safety) / 14))
+    };
+  }
+  function syntheticRoutes(dest) {
+    var s = geoStart, d = [dest.lat, dest.lng];
+    var mid = function (t, off) { return [s[0] + (d[0] - s[0]) * t + off, s[1] + (d[1] - s[1]) * t - off]; };
+    var base = [[s[0], s[1]], mid(.3, .0012), mid(.6, -.0008), [d[0], d[1]]];
+    return [
+      { coords: base, distance: 1200, seconds: 1080, safety: 92, time: 18, dist: '1.2', lamp: 86, cam: 12, event: 2 },
+      { coords: [base[0], mid(.3, -.0016), mid(.65, .0014), base[3]], distance: 1400, seconds: 1320, safety: 78, time: 22, dist: '1.4', lamp: 61, cam: 8, event: 4 },
+      { coords: [base[0], mid(.4, -.0026), mid(.7, .0022), base[3]], distance: 1100, seconds: 900, safety: 64, time: 15, dist: '1.1', lamp: 43, cam: 5, event: 7 }
+    ];
+  }
+  function drawRoutes(m, onlySelected) {
+    if (!m) return;
+    if (m._xaRoutes) m._xaRoutes.forEach(function (l) { m.removeLayer(l); });
+    m._xaRoutes = [];
+    var colors = [accent(), '#ffc46b', '#93a0b5'];
+    var all = [];
+    curRoutes.forEach(function (r, i) {
+      if (onlySelected && i !== (XA.route === 'A' ? 0 : XA.route === 'B' ? 1 : 2)) return;
+      var gcj = r.coords.map(function (p) { return wgs84ToGcj02(p[0], p[1]); });
+      var layer = L.polyline(gcj, { color: colors[i], weight: 5, opacity: .85 }).addTo(m);
+      layer._xaIndex = i;
+      m._xaRoutes.push(layer);
+      all = all.concat(gcj);
+    });
+    if (destPoint && !onlySelected) {
+      var dp = wgs84ToGcj02(destPoint.lat, destPoint.lng);
+      m._xaRoutes.push(L.circleMarker(dp, { radius: 7, color: '#ffc46b', fillColor: '#ffc46b', fillOpacity: .9 }).addTo(m));
+    }
+    if (all.length) m.fitBounds(L.latLngBounds(all).pad(.18));
+    highlightRoute();
+  }
+  function highlightRoute() {
+    var idx = XA.route === 'A' ? 0 : XA.route === 'B' ? 1 : 2;
+    [XA.$('.route-map'), XA.$('.nav-map')].forEach(function (el) {
+      var m = el && el._xaMap;
+      if (!m || !m._xaRoutes) return;
+      m._xaRoutes.forEach(function (l) {
+        if (!l.setStyle || l._xaIndex === undefined) return;
+        var on = l._xaIndex === idx;
+        l.setStyle({ weight: on ? 7 : 3, opacity: on ? 1 : .35 });
+      });
+    });
+  }
+  function updateRouteCards() {
+    var letters = ['A', 'B', 'C'];
+    curRoutes.forEach(function (r, i) {
+      var card = XA.$('.route-card[data-route="' + letters[i] + '"]');
+      if (!card) return;
+      var meta = card.querySelector('.route-meta');
+      if (meta) meta.innerHTML = ic('clock') + r.time + ' 分钟 <i>·</i> ' + r.dist + ' km <i>·</i> 步行';
+      var tags = card.querySelector('.route-tags');
+      if (tags) tags.innerHTML = '<span class="tag mint">路灯 ' + r.lamp + '%</span><span class="tag">监控 ' + r.cam + '</span><span class="tag">事件 ' + r.event + '</span>';
+      var ring = card.querySelector('.score-ring');
+      if (ring) {
+        ring.querySelector('span').textContent = r.safety;
+        ring.style.setProperty('--p', r.safety);
+        ring.style.setProperty('--ring', i === 0 ? '#7ff0d4' : i === 1 ? '#ffc46b' : '#93a0b5');
+      }
+    });
+    var idx = XA.route === 'B' ? 1 : XA.route === 'C' ? 2 : 0;
+    var eta = XA.$('#routeEta');
+    if (eta && curRoutes[idx]) eta.textContent = '路线 ' + (XA.route || 'A') + ' · 预计 ' + curRoutes[idx].time + ' 分钟';
+    var rbt = XA.$('#routeBtnText');
+    if (rbt) rbt.textContent = '开始导航';
+    var rm = XA.$('.rm-time');
+    if (rm && curRoutes[0]) rm.textContent = curRoutes[0].dist + ' km · ' + curRoutes[0].time + ' min';
+  }
+  function prefName() { return XA.settings.routePref === 'time' ? '时间优先' : '夜行优先'; }
+  function sortByPref() {
+    curRoutes.sort(function (a, b) { return XA.settings.routePref === 'time' ? a.seconds - b.seconds : b.safety - a.safety; });
+  }
+  function planRoutes(name) {
+    /* 按目的地名称解析终点，避免沿用上一次点击的旧点位导致路线跳转错乱 */
+    var dest = (XA.destPoint && XA.destPoint.name === name) ? XA.destPoint
+      : (destPoint && destPoint.name === name) ? destPoint
+      : DESTS[name] || null;
+    if (!dest) dest = { name: name, lat: DEFAULT.lat + 0.006, lng: DEFAULT.lng + 0.008 }; // 未知终点也落在武汉美院附近
+    destPoint = dest;
+    var start = geoStart;
+    /* 已配置高德 Key：先取官方真实步行道路折线（国内道路网，米级精确） */
+    if (XA.Geo && XA.Geo.hasKey()) {
+      XA.toast('正在规划真实步行路线…');
+      return XA.Geo.walking({ lat: start[0], lng: start[1] }, { lat: dest.lat, lng: dest.lng })
+        .then(function (real) {
+          if (!real || !real.coords || real.coords.length < 2) throw new Error('no real route');
+          var km = real.distance / 1000, min = Math.ceil(real.duration / 60);
+          var base = { coords: real.coords, distance: real.distance, seconds: real.duration,
+                       safety: 92, time: min, dist: km.toFixed(1), lamp: 88, cam: 12, event: 2, real: true };
+          /* 备选路线沿用同一真实起终点，仅作展示对比；主路线是货真价实的道路折线 */
+          var s = geoStart, d = [dest.lat, dest.lng];
+          var mid = function (t, off) { return [s[0]+(d[0]-s[0])*t+off, s[1]+(d[1]-s[1])*t-off]; };
+          curRoutes = [base,
+            Object.assign({}, base, { coords: [real.coords[0], mid(.3,-.0016), mid(.65,.0014), real.coords[real.coords.length-1]], safety:78, time:min+4, dist:(km+.3).toFixed(1), lamp:61, cam:8, event:4 }),
+            Object.assign({}, base, { coords: [real.coords[0], mid(.4,-.0026), mid(.7,.0022), real.coords[real.coords.length-1]], safety:64, time:min+2, dist:(km-.1).toFixed(1), lamp:43, cam:5, event:7 })];
+          sortByPref(); updateRouteCards(); syncPanel();
+          ['home-map','route-map','nav-map'].forEach(function (c) {
+            var e = XA.$('.'+c); if (e && e._xaMap) drawRoutes(e._xaMap, c==='nav-map');
+          });
+          XA.toast('已生成真实步行路线 · ' + km.toFixed(1) + ' km / 约 ' + min + ' 分钟');
+        })
+        .catch(function () { return planRoutesOSRM(start, dest); });
+    }
+    return planRoutesOSRM(start, dest);
+  }
+  function planRoutesOSRM(start, dest) {
+    var url = OSRM + 'driving/' + start[1] + ',' + start[0] + ';' + dest.lng + ',' + dest.lat +
+      '?overview=full&geometries=geojson&alternatives=true&steps=false';
+    XA.toast('正在规划夜行安全路线…');
+    return fetch(url).then(function (res) { return res.json(); }).then(function (data) {
+      if (data.code !== 'Ok' || !data.routes || !data.routes.length) throw new Error('no route');
+      curRoutes = data.routes.slice(0, 3).map(assessRoute);
+      sortByPref();
+      updateRouteCards(); syncPanel();
+      var eh = XA.$('.home-map'); if (eh && eh._xaMap) drawRoutes(eh._xaMap);
+      var em = XA.$('.route-map'); if (em && em._xaMap) drawRoutes(em._xaMap);
+      var en = XA.$('.nav-map'); if (en && en._xaMap) drawRoutes(en._xaMap, true);
+      XA.toast('已生成 3 条真实路线 · 按' + prefName() + '排序');
+    }).catch(function () {
+      curRoutes = syntheticRoutes(dest);
+      sortByPref();
+      updateRouteCards(); syncPanel();
+      var eh = XA.$('.home-map'); if (eh && eh._xaMap) drawRoutes(eh._xaMap);
+      var em = XA.$('.route-map'); if (em && em._xaMap) drawRoutes(em._xaMap);
+      XA.toast('路线服务暂不可用，已切换到演示路线');
+    });
+  }
+
+  /* ---------------- 搜索 ---------------- */
+  var searchTimer = null;
+  var HISTORY_KEY = 'xa_search_history', HISTORY_MAX = 6;
+  XA.searchHistory = [];
+  function esc(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function loadSearchHistory() {
+    try {
+      var h = JSON.parse(localStorage.getItem(HISTORY_KEY));
+      if (Array.isArray(h)) XA.searchHistory = h.filter(function (x) { return typeof x === 'string'; }).slice(0, HISTORY_MAX);
+    } catch (e) {}
+  }
+  function saveSearchHistory() {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(XA.searchHistory)); } catch (e) {}
+  }
+  function addSearchHistory(name) {
+    var n = String(name || '').trim();
+    if (!n) return;
+    XA.searchHistory = XA.searchHistory.filter(function (x) { return x !== n; });
+    XA.searchHistory.unshift(n);
+    XA.searchHistory = XA.searchHistory.slice(0, HISTORY_MAX);
+    saveSearchHistory();
+  }
+  function removeSearchHistory(index) {
+    XA.searchHistory.splice(index, 1);
+    saveSearchHistory();
+  }
+  function distanceText(p) {
+    var c = gcj(), rad = Math.PI / 180;
+    var dLat = (p.lat - c[0]) * rad, dLng = (p.lng - c[1]) * rad;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(c[0] * rad) * Math.cos(p.lat * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    var m = 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km';
+  }
+  function goToPlace(name, point) {
+    destPoint = point || DESTS[name] || { name: name, lat: DEFAULT.lat + 0.006, lng: DEFAULT.lng + 0.008 };
+    XA.setDestination(name, destPoint);
+    XA._lastPlanned = name;
+    addSearchHistory(name);
+    XA.closeModal();
+    showRoutePanel();
+    planRoutes(name);
+    XA.toast('已选择 ' + name + ' · 正在规划夜间安全路线');
+  }
+  function historyHtml() {
+    if (!XA.searchHistory.length) {
+      return '<div class="history-empty">' + ic('clock') + '<span>' + XA.t('historyEmpty') + '</span></div>';
+    }
+    return '<div class="history-grid">' + XA.searchHistory.map(function (name, i) {
+      return '<span class="history-chip"><button data-history="' + i + '">' + ic('clock') + esc(name) + '</button>' +
+        '<button class="history-remove" data-history-remove="' + i + '" aria-label="删除">' + ic('close') + '</button></span>';
+    }).join('') + '</div>';
+  }
+  function recoHtml() {
+    function card(p, i) {
+      return '<button class="reco-card' + (p.safe ? ' safe' : '') + '" data-reco="' + i + '">' +
+        '<span class="reco-ico">' + ic(p.icon) + '</span>' +
+        '<span class="reco-copy"><b>' + esc(p.name) + '</b><small>' + esc(p.cat) + '</small><em>' + distanceText(p) + ' · 预计 4–12 分钟</em></span>' +
+        '<span class="reco-meta"><b>' + esc(p.score) + '</b><small>' + (p.safe ? '安全优先' : '高评分') + '</small></span>' +
+        '<span class="reco-go">' + ic('chevron') + '</span></button>';
+    }
+    return '<div class="reco-group-label">' + ic('shield') + XA.t('nearbySafe') + '</div>' +
+      RECOMMENDS.map(function (p, i) { return p.safe ? card(p, i) : ''; }).join('') +
+      '<div class="reco-group-label">' + ic('pin') + XA.t('nearbyTop') + '</div>' +
+      RECOMMENDS.map(function (p, i) { return p.safe ? '' : card(p, i); }).join('');
+  }
+  /* 容错原则：清空属于可逆操作，给出「撤销」恢复通路，避免误操作代价 */
+  XA.actions['clear-history'] = function () {
+    if (!XA.searchHistory.length) { XA.toast('暂无历史搜索可清空', 'info'); return; }
+    var backup = XA.searchHistory.slice();
+    XA.searchHistory = []; saveSearchHistory(); XA.actions.search();
+    XA.toast('历史搜索已清空', 'success', function () {
+      XA.searchHistory = backup; saveSearchHistory(); XA.actions.search();
+      XA.toast('已恢复历史搜索', 'success');
+    });
+  };
+  XA.actions['show-recommend'] = function () {
+    var sh = XA.$('#modalLayer .sheet');
+    if (sh) sh.classList.add('expanded');
+  };
+  // 搜索范围：以自身定位为中心，限定公里数 + 所在城市
+  var SEARCH_SCOPES = { near5: 5, near20: 20, city: 60 };
+  if (!XA.searchScope || !SEARCH_SCOPES[XA.searchScope]) XA.searchScope = 'near20';
+  var cityName = '';          // 当前所在城市，异步解析后缓存
+  var cityTried = false;
+
+  function distanceM(lat1, lng1, lat2, lng2) {
+    var rad = Math.PI / 180, R = 6371000;
+    var dLat = (lat2 - lat1) * rad, dLng = (lng2 - lng1) * rad;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  // 通过逆地理编码解析当前城市（Photon reverse，失败则回退到定位演示城市）
+  function resolveCity(cb) {
+    if (cityTried) { cb(cityName); return; }
+    cityTried = true;
+    var s = geoStart;
+    var url = PHOTON.replace('/api/', '/reverse/') + '?lat=' + s[0] + '&lon=' + s[1] + '&limit=1';
+    fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+      var f = (data.features || [])[0], p = (f && f.properties) || {};
+      cityName = p.city || p.town || p.municipality || p.state || p.county || '';
+      cb(cityName);
+    }).catch(function () { cityName = ''; cb(cityName); });
+  }
+
+  function placeCity(p) { return p.city || p.town || p.municipality || p.county || p.state || ''; }
+  // Photon 不支持 lang=zh，中文类别词召回差；已知类别改用英文 OSM 术语
+  var PHOTON_Q = {
+    '酒店': 'hotel', '宾馆': 'hotel', '住宿': 'hotel',
+    '便利店': 'convenience store', '超市': 'supermarket', '商店': 'shop',
+    '公厕': 'toilets', '厕所': 'toilets', '洗手间': 'toilets', '卫生间': 'toilets',
+    '餐厅': 'restaurant', '饭店': 'restaurant', '美食': 'restaurant', '咖啡': 'cafe',
+    '药店': 'pharmacy', '医院': 'hospital', '地铁': 'subway', '公交': 'bus stop',
+    '停车': 'parking', '银行': 'bank'
+  };
+  function photonQuery(q) {
+    var s = String(q || '').trim();
+    if (PHOTON_Q[s]) return PHOTON_Q[s];
+    var keys = Object.keys(PHOTON_Q);
+    for (var i = 0; i < keys.length; i++) if (s.indexOf(keys[i]) >= 0) return PHOTON_Q[keys[i]];
+    return s;
+  }
+  function cityMatch(addrCity) {
+    if (!cityName || !addrCity) return true;               // 城市未知时不过滤，避免过度收紧
+    var a = cityName.replace(/市$/, ''), b = addrCity.replace(/市$/, '');
+    return a === b || a.indexOf(b) >= 0 || b.indexOf(a) >= 0;
+  }
+
+  function searchPlaces(q) {
+    var box = XA.$('#xaPlaceResults');
+    if (!box) return;
+    var scopeKm = SEARCH_SCOPES[XA.searchScope] || 20;
+    var c = geoStart; // 统一 WGS84，不能传高德瓦片用的 GCJ02 坐标
+    var origin = { lat: c[0], lng: c[1] };
+    /* 真实地点源：优先高德官方（米级），否则百度全国检索，最后 OSM */
+    function realPlaces() {
+      if (XA.Geo && XA.Geo.hasKey()) {
+        return XA.Geo.search(q, { origin: origin, limit: 20 }).catch(function () { return []; });
+      }
+      return Promise.resolve([]);
+    }
+    function render() {
+      realPlaces().then(function (amap) {
+        if (amap && amap.length) return amap;
+        return XA.GeoFallback ? XA.GeoFallback.search(q, { origin: origin }) : Promise.resolve([]);
+      }).then(function (list0) {
+        var list = (list0 || []).map(function (p) {
+          return { name:p.name, address:p.address||'', city:p.city||'', lat:p.lat, lng:p.lng,
+                   dist: distanceM(c[0], c[1], p.lat, p.lng) };
+        });
+        return list.length ? list : Promise.reject(new Error('EMPTY'));
+      }).then(function (list) {
+        var data = { features: list.map(function (p) {
+          return { properties:{ name:p.name, city:p.city, district:'', street:p.address }, geometry:{ coordinates:[p.lng,p.lat] } };
+        }) };
+        return data;
+      }).then(function (data) {
+        var list = (data.features || []).map(function (f) {
+          var p = f.properties || {}, co = f.geometry.coordinates || [];
+          var lat = co[1], lng = co[0];
+          return {
+            name: p.name || p.street || '未命名地点',
+            address: [p.city, p.district, p.street].filter(Boolean).join(' · '),
+            city: placeCity(p),
+            lat: lat, lng: lng,
+            dist: (typeof lat === 'number' && typeof lng === 'number') ? distanceM(c[0], c[1], lat, lng) : Infinity
+          };
+        }).filter(function (p) {
+          return p.name && String(p.name) !== 'undefined' && isFinite(p.lat) && isFinite(p.lng);
+        })
+        /* 全国检索：不再用「同城 / 半径」过滤掉外地真实地点，仅按距离排序 */
+        .sort(function (a, b) { return a.dist - b.dist; }).slice(0, 12);
+
+        var scopeLabel = XA.searchScope === 'city' ? (cityName || '所在城市') : (scopeKm + ' 公里内');
+        if (!list.length) {
+          box.innerHTML = '<div style="font-size:10px;color:var(--dim);padding:10px;line-height:1.6">' +
+            '在' + esc(scopeLabel) + '未找到“' + esc(q) + '”相关地点。<br>可切换更大的搜索范围后重试。</div>';
+          XA._xaPlaces = [];
+          return;
+        }
+        box.innerHTML = '<div class="search-scope-note">' + ic('pin') + ' ' + esc(scopeLabel) + ' · 找到 ' + list.length + ' 个结果</div>' +
+          list.map(function (p, i) {
+            var d = p.dist >= 1000 ? (p.dist / 1000).toFixed(1) + ' km' : Math.round(p.dist) + ' m';
+            return '<button class="option-row" data-photon="' + i + '">' + ic('pin') +
+              '<span><b>' + esc(p.name) + '</b><small>' + esc(p.address) + '</small></span>' +
+              '<em class="place-dist">' + d + '</em></button>';
+          }).join('');
+        XA._xaPlaces = list;
+      }).catch(function () {
+        box.innerHTML = '<div style="font-size:10px;color:var(--dim);padding:10px">搜索失败，请检查网络</div>';
+      });
+    }
+    box.innerHTML = '<div style="font-size:10px;color:var(--dim);padding:10px">正在搜索附近地点…</div>';
+    resolveCity(render);
+  }
+  XA.actions.search = function () {
+    var presets = Object.keys(DESTS);
+    XA.openSheet('<h3 data-i18n="search">搜索目的地</h3><div class="sheet-sub" data-i18n="searchSheetSub">输入关键词搜索真实地点，或使用下方地址</div>' +
+      '<div class="scope-picker"><span class="scope-label">' + ic('pin') + ' 搜索范围</span>' +
+        '<div class="scope-seg">' +
+          '<button data-scope="near5" class="' + (XA.searchScope === 'near5' ? 'on' : '') + '">附近 5km</button>' +
+          '<button data-scope="near20" class="' + (XA.searchScope === 'near20' ? 'on' : '') + '">附近 20km</button>' +
+          '<button data-scope="city" class="' + (XA.searchScope === 'city' ? 'on' : '') + '">所在城市</button>' +
+        '</div></div>' +
+      '<input id="xaSearchInput" class="sheet-input" style="min-height:auto;height:44px" placeholder="输入地点名称，如 酒店" autocomplete="off">' +
+      '<div id="xaPlaceResults" class="search-results"></div>' +
+      '<div class="fav-hint">' + ic('pin') + '<span><b data-i18n="commonAddresses">常用地址</b><small data-i18n="commonHint">点击即可快速规划夜间安全路线</small></span></div>' +
+      '<div id="xaPreset" class="seg">' + presets.map(function (n) {
+        return '<button data-xa-dest="' + esc(n) + '">' + esc(n) + '</button>';
+      }).join('') + '</div>' +
+      '<div class="search-section-title"><b data-i18n="historySearch">历史搜索</b><small><span data-i18n="historyHint">最多保留 6 条最近搜索</span><button data-action="clear-history" data-i18n="clearHistory">清空</button></small></div>' +
+      historyHtml() +
+      '<button class="swipe-tip" data-action="show-recommend">' + ic('back') + '<span data-i18n="swipeUpTip">上滑查看附近推荐地点</span></button>' +
+      '<div class="reco-section"><div class="search-section-title reco-title"><b data-i18n="recommendPlaces">推荐地点</b><small data-i18n="recommendHint">附近安全且高评分的去处</small></div>' + recoHtml() + '</div>');
+    var sh = XA.$('#modalLayer .sheet');
+    if (sh) sh.classList.add('search-sheet');
+    var input = XA.$('#xaSearchInput');
+    if (input) {
+      input.addEventListener('input', function () {
+        clearTimeout(searchTimer);
+        var q = input.value.trim();
+        if (q.length < 2) { XA.$('#xaPlaceResults').innerHTML = ''; return; }
+        searchTimer = setTimeout(function () { searchPlaces(q); }, 450);
+      });
+      input.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        var q = input.value.trim();
+        if (q.length < 2) return;
+        clearTimeout(searchTimer);
+        addSearchHistory(q);
+        searchPlaces(q);
+      });
+      setTimeout(function () { input.focus(); }, 260);
+    }
+    XA.$$('[data-scope]').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        XA.searchScope = b.dataset.scope;
+        XA.$$('[data-scope]').forEach(function (x) { x.classList.toggle('on', x === b); });
+        var q = input ? input.value.trim() : '';
+        if (q.length >= 2) searchPlaces(q);
+        else XA.toast('搜索范围已切换为 ' + b.textContent);
+      });
+    });
+  };
+
+  /* ---------------- SOS 倒计时在 app.js 中实现（支持重复触发与多种取消方式） ---------------- */
+
+  /* ---------------- 天气 ---------------- */
+  var lastWeather = null;
+  function weatherLabel(code) {
+    var en = XA.lang === 'en';
+    if (code === 0) return en ? 'Clear' : '晴';
+    if (code === 1 || code === 2) return en ? 'Partly cloudy' : '多云';
+    if (code === 3) return en ? 'Overcast' : '阴';
+    if (code >= 45 && code <= 48) return en ? 'Foggy' : '雾';
+    if (code >= 51 && code <= 67) return en ? 'Rainy' : '雨';
+    if (code >= 71 && code <= 77) return en ? 'Snowy' : '雪';
+    if (code >= 80 && code <= 82) return en ? 'Showers' : '阵雨';
+    if (code >= 95) return en ? 'Thunderstorm' : '雷阵雨';
+    return en ? 'Cloudy' : '多云';
+  }
+  function paintWeather(temp, text) {
+    lastWeather = { temp: temp, text: text };
+    XA.weatherText = Math.round(temp) + '° ' + text;
+    var el = XA.$('#weatherText');
+    if (el) el.textContent = XA.weatherText;
+  }
+  function updateWeather() {
+    if (lastWeather) { paintWeather(lastWeather.temp, lastWeather.text); return; }
+    var c = gcj();
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + c[0] + '&longitude=' + c[1] + '&current=temperature_2m,weather_code';
+    fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+      var cur = d && d.current;
+      if (!cur || typeof cur.temperature_2m !== 'number') throw new Error('no weather');
+      paintWeather(cur.temperature_2m, weatherLabel(cur.weather_code));
+    }).catch(function () {
+      var en = XA.lang === 'en';
+      paintWeather(22, en ? 'Cloudy' : '多云');
+    });
+  }
+  XA.updateWeather = updateWeather;
+  XA.clearWeather = function () { lastWeather = null; };
+
+  /* ---------------- 加载流程 ---------------- */
+  XA.playSplash = function () {
+    var splash = XA.$('#splash'), status = XA.$('#splashStatus');
+    if (!splash) return;
+    var stages = [
+      [0, '正在连接夜间守护…'],
+      [450, '正在载入武汉藏龙岛演示地图…'],
+      [1100, '正在校准路灯与事件数据…'],
+      [1750, 'AI 安星正在守护…']
+    ];
+    stages.forEach(function (s) { setTimeout(function () { if (status) status.textContent = s[1]; }, s[0]); });
+    initHomeMap();
+    updateWeather();
+    /* 启动阶段不申请定位；登录完成后由 startLiveLocation 申请权限，未授权时保持武汉演示起点 */
+    var gone = false;
+    function dismiss() {
+      if (gone) return;
+      gone = true;
+      splash.classList.add('done');
+      setTimeout(function () { if (splash.parentNode) splash.remove(); }, 650);
+      setTimeout(maybeShowLogin, 200);
+    }
+    setTimeout(dismiss, 2200);
+    setTimeout(dismiss, 4000);
+  };
+
+  /* ---------------- 挂载 ---------------- */
+  var origGo = XA.go;
+  XA.go = function (screen, noHistory) {
+    origGo(screen, noHistory);
+    if (screen !== 'home') hideGuideHint();   // 离开首页即收起引导提示，不打断导航或其它功能
+    // 登录完成后，首次进入功能页面立即弹出新手引导（登录层仍打开时不弹）
+    if (XA.guidePending && screen !== 'sos' && XA.maybeStartGuide) {
+      var pendingScreen = screen;
+      setTimeout(function () {
+        if (pendingScreen !== 'sos') XA.maybeStartGuide();
+      }, 320);
+    }
+    // 离开首页（切到其它标签）时主动结束导航，保证任何页面都能退出
+    if (screen !== 'home') {
+      var nav = XA.$('.nav-session');
+      if (nav) { nav.remove(); clearInterval(XA.navTimer); stopWatch(); }
+    }
+    if (screen === 'home') {
+      if (!noHistory) resetHome();
+    }
+    if (screen === 'route') setTimeout(function () {
+      initRouteMap();
+      if (!curRoutes.length || XA._lastPlanned !== XA.destination) {
+        XA._lastPlanned = XA.destination;
+        planRoutes(XA.destination);
+      }
+    }, 60);
+  };
+  var origSelect = XA.selectRoute;
+  XA.selectRoute = function (l) { origSelect(l); highlightRoute(); };
+  var origStart = XA.actions['start-nav'];
+  var origArStart = XA.actions['start-ar-nav'];
+  function enterNavSession(mode) {
+    setHomeState('nav');
+    setTimeout(function () {
+      initNavMap();
+      startWatch();
+      var nav = XA.$('.nav-session');
+      if (nav) {
+        var duplicateSos = nav.querySelector('.nav-sos'); if (duplicateSos) duplicateSos.remove();
+      }
+      var arEnd = XA.$('.ar-end'); if (arEnd) arEnd.hidden = mode !== 'ar';
+      if (curRoutes.length) {
+        var idx = XA.route === 'A' ? 0 : XA.route === 'B' ? 1 : 2;
+        var r = curRoutes[idx];
+        var title = XA.$('#turnTitle');
+        if (title) title.textContent = '沿安全路线 ' + XA.route + ' 前往' + XA.destination;
+        var sub = XA.$('#turnSub');
+        if (sub) sub.textContent = r.lamp + '% 路灯覆盖 · 预计 ' + r.time + ' 分钟';
+        var rem = XA.$('#navRemain'), dist = XA.$('#navDist');
+        if (rem) rem.textContent = r.time;
+        if (dist) dist.textContent = r.dist;
+      }
+    }, 90);
+  }
+  XA.actions['start-nav'] = function (el) {
+    /* 内联「开始导航」按钮：以所在路线卡片为准，避免选中与导航路线不一致 */
+    var card = el && el.closest ? el.closest('.route-card') : null;
+    if (card && card.dataset.route) XA.selectRoute(card.dataset.route);
+    origStart();
+    enterNavSession('phone');
+  };
+  XA.actions['start-ar-nav'] = function () {
+    origArStart();
+    enterNavSession('ar');
+  };
+  var origEnd = XA.actions['end-nav'];
+  XA.actions['end-nav'] = function () {
+    stopWatch(); origEnd(); resetHome();
+    var arEnd = XA.$('.ar-end'); if (arEnd) arEnd.hidden = true;
+    XA.toast(XA.navMode === 'ar' ? '已退出 AR 眼镜导航 · 行程记录已保存' : '已退出导航 · 行程记录已保存');
+  };
+  var origFire = XA.fireAlarm;
+  XA.fireAlarm = function () { stopWatch(); origFire(); };
+  XA.actions.layer = function () {
+    var p = XA.$('#mapModePop'), r = XA.$('#riskPopover');
+    if (r) r.classList.remove('open');
+    if (p) p.classList.toggle('open');
+  };
+  XA.actions['close-map-mode'] = function () { var p = XA.$('#mapModePop'); if (p) p.classList.remove('open'); };
+
+  XA.init();
+  loadSettings();
+  openSettings();          // 预渲染「个性化管理」与「守护功能」两块内容
+  document.body.classList.add('points-hidden');   // 地图风险点位默认隐藏，点击查看才显示
+  syncPointsState();                             // 可见性：首屏即显示当前点位状态
+  var _rpl = XA.$('#routePrefLabel');
+  if (_rpl) _rpl.textContent = prefName() + (XA.settings.routePref === 'time' ? ' · 最快到达' : ' · 安全第一');
+  loadAccount();
+  loadPrivacy();
+  loadSearchHistory();
+  XA.loadFanqie();
+  if (XA.renderCommunity) XA.renderCommunity();
+  if (XA.renderProfileCounts) XA.renderProfileCounts();
+  var savedLang = 'zh';
+  try { savedLang = localStorage.getItem('xa_language') || 'zh'; } catch (e) {}
+  XA.setLanguage(savedLang);
+  /* 打开即自动定位：向系统申请 GPS / 北斗精确位置，成功后地图视角、路线起点、
+     搜索中心、SOS 位置共享全部切换到真实位置，并用高德逆地理编码解析真实街道地址。
+     浏览器会弹出一次授权请求（系统安全要求，无法跳过），拒绝时给出明确提示。 */
+  /* 直接申请定位，不依赖 Permissions API（部分浏览器/内嵌环境会挂起）。
+     系统会弹出一次授权请求，用户允许后地图立即跳到真实位置。 */
+  if (navigator.geolocation && XA.startLiveLocation) {
+    setTimeout(function () { XA.startLiveLocation(true); }, 300);
+  }
+  buildLogin();
+  var profileCard = XA.$('[data-screen="profile"] .profile-card');
+  if (profileCard) profileCard.addEventListener('click', function () { XA.actions['open-login'](); });
+  document.addEventListener('click', function (e) {
+    /* 用户一旦开始其它操作就收起引导提示，不覆盖弹窗、不打断当前任务 */
+    var act = e.target.closest && e.target.closest('[data-action]');
+    if (act && act.dataset.action !== 'dismiss-guide-hint') hideGuideHint();
+    var ap = e.target.closest('[data-appearance]');
+    if (ap) {
+      XA.settings.appearance = ap.dataset.appearance; saveSettings(); applyAppearance(); openSettings();
+      var label = ({ system: '跟随设备系统', dark: '深色主题', light: '浅色主题' })[XA.settings.appearance];
+      XA.toast('已切换为' + label + ' · 地图底色已同步'); return;
+    }
+    var theme = e.target.closest('[data-theme-set]');
+    if (theme) { XA.settings.theme = theme.dataset.themeSet; saveSettings(); applyTheme(); openSettings(); XA.toast('主题色已更新'); return; }
+    var cd = e.target.closest('[data-soscd]');
+    if (cd) { XA.settings.sosCd = parseInt(cd.dataset.soscd, 10); saveSettings(); openSettings(); XA.toast('SOS 倒计时已设为 ' + XA.settings.sosCd + ' 秒'); return; }
+    var rp = e.target.closest('[data-routepref]');
+    if (rp) {
+      XA.settings.routePref = rp.dataset.routepref === 'time' ? 'time' : 'night';
+      saveSettings();
+      var rpl = XA.$('#routePrefLabel');
+      if (rpl) rpl.textContent = prefName() + (XA.settings.routePref === 'time' ? ' · 最快到达' : ' · 安全第一');
+      XA.closeModal();
+      XA.toast('已切换为' + prefName() + ' · 路线将重新排序');
+      XA._lastPlanned = null;
+      if (XA.go && XA.$('[data-screen="route"]') && !XA.$('[data-screen="route"]').hidden) planRoutes(XA.destination);
+      return;
+    }
+    var color = e.target.closest('[data-color]');
+    if (color) { XA.settings.markers[color.dataset.color].color = color.dataset.value; saveSettings(); refreshMapLayers(); openSettings(); return; }
+    var shape = e.target.closest('[data-shape]');
+    if (shape) { XA.settings.markers[shape.dataset.shape].shape = shape.dataset.value; saveSettings(); refreshMapLayers(); openSettings(); return; }
+    var glow = e.target.closest('[data-glow]');
+    if (glow) { XA.settings.markers[glow.dataset.glow].glow = parseInt(glow.dataset.value, 10); saveSettings(); refreshMapLayers(); openSettings(); return; }
+    var tg = e.target.closest('[data-toggle]');
+    if (tg) {
+      var k = tg.dataset.toggle;
+      XA.settings[k] = !XA.settings[k];
+      tg.classList.toggle('on', XA.settings[k]);
+      saveSettings(); refreshMapLayers();
+      XA.toast(({ voice: '危险语音提醒', follow: '位置跟随', radar: '雷达扫描', acc: '精度显示' })[k] + (XA.settings[k] ? '已开启' : '已关闭'));
+      return;
+    }
+    var histRemove = e.target.closest('[data-history-remove]');
+    if (histRemove) {
+      e.stopPropagation();
+      removeSearchHistory(parseInt(histRemove.dataset.historyRemove, 10));
+      XA.actions.search();
+      return;
+    }
+    var hist = e.target.closest('[data-history]');
+    if (hist) { goToPlace(XA.searchHistory[parseInt(hist.dataset.history, 10)]); return; }
+    var reco = e.target.closest('[data-reco]');
+    if (reco) {
+      var rp = RECOMMENDS[parseInt(reco.dataset.reco, 10)];
+      if (rp) goToPlace(rp.name, rp);
+      return;
+    }
+    var dest = e.target.closest('[data-xa-dest]');
+    if (dest) { goToPlace(dest.dataset.xaDest, DESTS[dest.dataset.xaDest]); return; }
+    var ph = e.target.closest('[data-photon]');
+    if (ph && XA._xaPlaces) {
+      var p = XA._xaPlaces[parseInt(ph.dataset.photon, 10)];
+      goToPlace(p.name, p);
+      return;
+    }
+    var mm = e.target.closest('[data-map-mode]');
+    if (mm) {
+      mapMode = mm.dataset.mapMode;
+      XA.$$('[data-map-mode]').forEach(function (b) { b.classList.toggle('on', b === mm); });
+      applyMapMode(); XA.toast('地图视角已切换为 ' + mapMode.toUpperCase()); return;
+    }
+    var bm = e.target.closest('[data-base-map]');
+    if (bm) {
+      baseMap = bm.dataset.baseMap;
+      XA.$$('[data-base-map]').forEach(function (b) { b.classList.toggle('on', b === bm); });
+      applyMapMode(); XA.toast(baseMap === 'satellite' ? '已切换卫星地图' : '已切换标准地图'); return;
+    }
+    var menuItem = e.target.closest('[data-menu="appearance"]');
+    if (menuItem) { XA.actions['settings-appearance'](); return; }
+    if (!e.target.closest('#riskPopover') && !e.target.closest('[data-action="risk-popover"]')) {
+      var rp = XA.$('#riskPopover');
+      if (rp && rp.classList.contains('open')) rp.classList.remove('open');
+    }
+    if (!e.target.closest('#mapModePop') && !e.target.closest('[data-action="layer"]')) {
+      var mp = XA.$('#mapModePop'); if (mp) mp.classList.remove('open');
+    }
+  });
+
+  /* 面板手势：上滑展开 / 下滑关闭 */
+  var panel = XA.$('#routePanel');
+  if (panel) {
+    var py = 0, pd = 0, dragging = false;
+    panel.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse') return;
+      py = e.clientY; pd = 0; dragging = true;
+      panel.style.transition = 'none';
+    });
+    panel.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      pd = e.clientY - py;
+      panel.style.transform = 'translateY(' + Math.max(0, pd) + 'px)';
+    });
+    function endPanel() {
+      if (!dragging) return;
+      dragging = false;
+      panel.style.transition = '';
+      panel.style.transform = '';
+      if (pd > 90) resetHome();
+      else if (pd < -50) panel.classList.add('expanded');
+    }
+    panel.addEventListener('pointerup', endPanel);
+    panel.addEventListener('pointercancel', endPanel);
+  }
+  /* 左边缘右滑呼出功能抽屉 */
+  var sx = 0, sy = 0, tracking = false;
+  document.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse') return;
+    sx = e.clientX; sy = e.clientY; tracking = sx < 24;
+  });
+  document.addEventListener('pointerup', function (e) {
+    if (!tracking) return;
+    tracking = false;
+    if (e.clientX - sx > 80 && Math.abs(e.clientY - sy) < 60) XA.actions['open-drawer']();
+  });
+})();

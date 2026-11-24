@@ -1,0 +1,1474 @@
+XA.I18N = {
+  zh: {
+    nav: '导航', entertainment: '伴行', community: '社区', profile: '我的', sos: '紧急求助',
+    searchHint: '搜索目的地、公交站', routeAnalysis: '路线安全分析', routeSub: '已按安全优先排序', emergency: '紧急求助',
+    settings: '设置', settingsSub: '守护偏好与账号', contacts: '紧急联系人', routes: '我的安全路线', history: '守护记录',
+    about: '关于安星', privacy: '隐私与权限', appearance: '外观与主题', themeName: '薄荷夜色',
+    accountSecurity: '账号与安全', deviceBound: '已绑定设备', language: '管理语言', languageName: '简体中文',
+    device: 'AR 眼镜设备', switchAccount: '切换账号', logout: '退出登录',
+    accountSecuritySub: '登录方式、设备与紧急访问', accountLogin: '登录方式', accountPhone: '手机号',
+    accountDevice: '已配对设备', accountChange: '管理', languageSub: '选择应用显示语言',
+    languageChinese: '简体中文', languageEnglish: 'English', switchAccountSub: '可使用其他手机号登录',
+    continueSwitch: '继续切换', cancel: '取消', navActive: '安全导航中', remainingMin: '剩余分钟',
+    remainingKm: '剩余公里', endNav: '退出导航', startNav: '开始导航',
+    search: '搜索目的地', commonAddresses: '常用地址', commonHint: '点击即可快速规划夜间安全路线',
+    mapSettings: '地图设置', view: '视角', basemap: '底图', standard: '标准', satellite: '卫星',
+    musicPlaying: '正在播放 · 后台播放', weatherFallback: '22° 多云',
+    entertainmentSub: '夜路很长，让声音陪你走', communitySub: '真实夜行经验，彼此照亮',
+    arSub: '眼镜控制台', profileSub: '守护设置与夜行记录',
+    activeNow: 'AI 安星正在守护',
+    settingsPageSub: '个性、安全与设备', personalSettings: '个性设置', personalSub: '外观、语言与显示偏好',
+    securityPrivacySettings: '安全隐私设置', securityPrivacySub: '权限、账号与访问范围',
+    otherSettings: '其他设置', otherSub: '关于、设备与帮助', feedback: '问题反馈', feedbackSub: '联系客服或提交问题',
+    privacyManage: '隐私与权限', privacyManageSub: '主页访问、购买记录与定位权限',
+    allowHomepage: '允许他人访问我的主页', allowHomepageDesc: '关闭后他人无法查看你的主页',
+    hidePurchases: '隐藏购买记录', hidePurchasesDesc: '开启后他人无法查看你的购买记录',
+    locationPermission: '位置权限', locationPermissionDesc: '仅导航和紧急求助时使用，关闭后需手动输入地址',
+    analytics: '匿名体验改进', analyticsDesc: '关闭后不会上传交互统计',
+    enabled: '已开启', disabled: '已关闭', privacySaved: '隐私设置已保存',
+    feedbackTitle: '问题反馈', feedbackSub: '请告诉我们遇到的问题', feedbackType: '问题类型',
+    feedbackPlaceholder: '请描述问题发生的时间、页面和操作步骤…', submitFeedback: '提交反馈',
+    contactService: '联系在线客服', serviceTitle: '在线客服', serviceSub: '工作日 9:00–22:00 · 演示会话',
+    servicePlaceholder: '输入你想咨询的问题…', sendMessage: '发送', feedbackThanks: '反馈已提交，我们会尽快联系你',
+    logoutConfirmTitle: '是否退出登录？', logoutConfirmSub: '退出后将无法同步安全路线与守护记录',
+    confirmLogout: '确认退出', keepLogin: '保持登录',
+    historySearch: '历史搜索', historyHint: '最多保留 6 条最近搜索', historyEmpty: '暂无历史搜索，试试下方常用地址',
+    clearHistory: '清空', recommendPlaces: '推荐地点', recommendHint: '附近安全且高评分的去处',
+    swipeUpTip: '上滑查看附近推荐地点', nearbySafe: '安全优先 · 附近守护点', nearbyTop: '附近高分去处',
+    searchSheetSub: '输入关键词搜索真实地点，或使用下方地址',
+    fanqie: '番茄小说', fanqieLogin: '登录番茄小说账号', fanqieLoggedIn: '已登录番茄小说账号', fanqieLoginSub: '登录后可收听番茄精选小说',
+    fanqiePhone: '手机号', fanqieCode: '验证码', fanqieGetCode: '获取验证码', fanqieLoginBtn: '登录并继续',
+    fanqieQr: '扫码登录', fanqieQrTip: '请使用番茄小说 App 扫描二维码（演示）', fanqieLoginRequired: '请先登录番茄小说账号',
+    fanqieFeatured: '番茄精选', fanqieAdd: '同步我的书架', fanqieAddSub: '演示同步：将收藏 / 最近阅读中的小说加入伴行页',
+    fanqieAddBtn: '同步并收藏', fanqieNoCustom: '书架还是空的', fanqieLogout: '退出番茄小说',
+    bookPlayTip: '听书全程留在安星，底部 SOS 始终可用。', fanqieCustom: '我的书架',
+    audioBook: '伴行听书', bookSubtitle: '接入番茄小说开放能力，APP 内沉浸式听书，不离开安星',
+    fanqieQuickLogin: '番茄小说快捷登录入口', refreshBooks: '换一批', bookSafety: '导航中 · 安全分 92 · 感知开启',
+    prevChapter: '上一章', nextChapter: '下一章', bookDemoTip: '网页无法读取其他 App 的真实书架与听书进度，小说、章节和进度均为模拟演示数据。',
+    syncBookshelf: '同步我的书架', syncRecent: '同步最近阅读', pasteBook: '搜索并添加小说',
+    syncBookshelfTip: '演示同步：将番茄小说书架中的作品加入伴行页。真实环境需番茄开放平台授权。',
+    listening: '正在播放', paused: '已暂停', readDuration: '预计 12 分钟',
+    musicSource: '音源', sourceLocal: '安星本地歌单', sourceNetease: '跳转网易云音乐', sourceQQ: '跳转 QQ 音乐',
+    sourceSheetSub: '选择音源；除本地歌单外均为概念跳转，播放器展示模拟数据。',
+    sourceDemoTip: '网页无法读取其他 App 的真实后台播放信息，歌名、歌词、封面和进度均为模拟演示数据。',
+    sourceLocalOn: '已切换到安星本地歌单', sourceNeteaseOn: '正在唤起网易云音乐（概念演示）', sourceQQOn: '正在唤起 QQ 音乐（概念演示）',
+    playlistNight: '夜行歌单', playlistRain: '雨夜白噪音', playlistHint: '点击歌曲立即播放 · 概念演示',
+    setWhiteNoise: '已切换为雨夜白噪音歌单', playTrack: '播放'
+  },
+  en: {
+    nav: 'Navigate', entertainment: 'Companion', community: 'Community', profile: 'Me', sos: 'Emergency',
+    searchHint: 'Search destinations or stops', routeAnalysis: 'Route safety', routeSub: 'Sorted by safety first', emergency: 'Emergency',
+    settings: 'Settings', settingsSub: 'Preferences & account', contacts: 'Emergency contacts', routes: 'My safe routes', history: 'Guard history',
+    about: "About Anxing", privacy: 'Privacy & permissions', appearance: 'Appearance & theme', themeName: 'Mint night',
+    accountSecurity: 'Account & security', deviceBound: 'Device paired', language: 'Language', languageName: 'English',
+    device: 'AR glasses', switchAccount: 'Switch account', logout: 'Sign out',
+    accountSecuritySub: 'Sign-in method, devices and emergency access', accountLogin: 'Sign-in method', accountPhone: 'Phone number',
+    accountDevice: 'Paired device', accountChange: 'Manage', languageSub: 'Choose the app display language',
+    languageChinese: '简体中文', languageEnglish: 'English', switchAccountSub: 'Sign in with another phone number',
+    continueSwitch: 'Continue', cancel: 'Cancel', navActive: 'Safe navigation', remainingMin: 'min left',
+    remainingKm: 'km left', endNav: 'Exit navigation', startNav: 'Start navigation',
+    search: 'Search destination', commonAddresses: 'Frequent addresses', commonHint: 'Tap to plan a safe night route',
+    mapSettings: 'Map settings', view: 'View', basemap: 'Basemap', standard: 'Standard', satellite: 'Satellite',
+    musicPlaying: 'Now playing · Background', weatherFallback: '22° Cloudy',
+    entertainmentSub: 'Long roads sound better together', communitySub: 'Real night walks, shared light',
+    arSub: 'Glasses console', profileSub: 'Safety settings & trip history',
+    activeNow: 'Anxing is guarding you',
+    settingsPageSub: 'Personal, safety & device', personalSettings: 'Personal', personalSub: 'Theme, language & display',
+    securityPrivacySettings: 'Safety & privacy', securityPrivacySub: 'Permissions, account & access',
+    otherSettings: 'More', otherSub: 'About, device & help', feedback: 'Feedback', feedbackSub: 'Contact support or report an issue',
+    privacyManage: 'Privacy & permissions', privacyManageSub: 'Profile access, purchases & location',
+    allowHomepage: 'Allow others to view my profile', allowHomepageDesc: 'Turn off to hide your profile from others',
+    hidePurchases: 'Hide purchase history', hidePurchasesDesc: 'Turn on to hide your purchases from others',
+    locationPermission: 'Location permission', locationPermissionDesc: 'Used only for navigation and SOS; off requires manual address entry',
+    analytics: 'Anonymous experience insights', analyticsDesc: 'Turn off to stop sending interaction statistics',
+    enabled: 'On', disabled: 'Off', privacySaved: 'Privacy settings saved',
+    feedbackTitle: 'Send feedback', feedbackSub: 'Tell us what went wrong', feedbackType: 'Issue type',
+    feedbackPlaceholder: 'Describe when it happened, where, and what you did…', submitFeedback: 'Submit feedback',
+    contactService: 'Contact live support', serviceTitle: 'Live support', serviceSub: 'Weekdays 9:00–22:00 · demo chat',
+    servicePlaceholder: 'Type your question…', sendMessage: 'Send', feedbackThanks: 'Thanks, we will contact you soon',
+    logoutConfirmTitle: 'Sign out?', logoutConfirmSub: 'You will not be able to sync routes and guard history',
+    confirmLogout: 'Sign out', keepLogin: 'Stay signed in',
+    historySearch: 'Recent searches', historyHint: 'Keeps up to 6 recent places', historyEmpty: 'No recent searches yet. Try the addresses below.',
+    clearHistory: 'Clear', recommendPlaces: 'Recommended nearby', recommendHint: 'Safe and highly rated places near you',
+    swipeUpTip: 'Swipe up for nearby recommendations', nearbySafe: 'Safety first · nearby protection', nearbyTop: 'Top-rated nearby',
+    searchSheetSub: 'Search real places or use the saved addresses below',
+    fanqie: 'Fanqie Novel', fanqieLogin: 'Sign in to Fanqie', fanqieLoggedIn: 'Signed in to Fanqie', fanqieLoginSub: 'Sign in to listen to featured novels',
+    fanqiePhone: 'Phone', fanqieCode: 'Code', fanqieGetCode: 'Get code', fanqieLoginBtn: 'Sign in & continue',
+    fanqieQr: 'QR sign-in', fanqieQrTip: 'Scan this QR code in the Fanqie Novel app (demo)', fanqieLoginRequired: 'Please sign in to Fanqie first',
+    fanqieFeatured: 'Fanqie picks', fanqieAdd: 'Sync bookshelf', fanqieAddSub: 'Demo sync: add saved or recently read novels',
+    fanqieAddBtn: 'Sync & save', fanqieNoCustom: 'Your bookshelf is empty', fanqieLogout: 'Sign out of Fanqie',
+    bookPlayTip: 'Audiobooks stay inside Anxing. The bottom SOS button is always available.', fanqieCustom: 'My bookshelf',
+    audioBook: 'Companion audiobooks', bookSubtitle: 'Powered by Fanqie Novel. Listen to stories without leaving Anxing.',
+    fanqieQuickLogin: 'Quick sign-in with Fanqie Novel', refreshBooks: 'Refresh', bookSafety: 'Navigating · Safety 92 · Sensing on',
+    prevChapter: 'Previous chapter', nextChapter: 'Next chapter', bookDemoTip: 'Web pages cannot read real bookshelves or listening progress. Novels, chapters and progress are simulated.',
+    syncBookshelf: 'Sync my bookshelf', syncRecent: 'Sync recently read', pasteBook: 'Search & add novel',
+    syncBookshelfTip: 'Demo sync: add novels from a Fanqie bookshelf. Real sync requires platform authorization.',
+    listening: 'Playing', paused: 'Paused', readDuration: 'About 12 min',
+    musicSource: 'Source', sourceLocal: 'Anxing local playlist', sourceNetease: 'Open NetEase Cloud Music', sourceQQ: 'Open QQ Music',
+    sourceSheetSub: 'Choose a source. Only the local playlist is real; other options are concept redirects with demo data.',
+    sourceDemoTip: 'Web pages cannot read real background playback from other apps. Track, lyric, cover and progress are simulated.',
+    sourceLocalOn: 'Switched to Anxing local playlist', sourceNeteaseOn: 'Opening NetEase Cloud Music (demo)', sourceQQOn: 'Opening QQ Music (demo)',
+    playlistNight: 'Night walk playlist', playlistRain: 'Rainy night white noise', playlistHint: 'Tap a track to play · concept demo',
+    setWhiteNoise: 'Switched to rainy night white noise', playTrack: 'Play'
+  }
+};
+XA.lang = 'zh';
+XA.t = function (key) {
+  var dict = XA.I18N[XA.lang] || XA.I18N.zh;
+  return dict[key] || XA.I18N.zh[key] || key;
+};
+XA.applyI18n = function () {
+  document.documentElement.lang = XA.lang === 'en' ? 'en' : 'zh-CN';
+  XA.$$('[data-i18n]').forEach(function (el) {
+    var value = XA.t(el.dataset.i18n);
+    if (el.textContent.trim() !== value) el.textContent = value;
+  });
+  XA.$$('[data-i18n-placeholder]').forEach(function (el) {
+    el.setAttribute('placeholder', XA.t(el.dataset.i18nPlaceholder));
+  });
+  if (XA.renderAccount) XA.renderAccount();
+  if (XA.renderFanqieAccount) XA.renderFanqieAccount();
+  if (XA.renderFanqieBooks) XA.renderFanqieBooks();
+  if (XA.updatePlayer) XA.updatePlayer();
+  if (XA.renderPlaylistCards) XA.renderPlaylistCards();
+};
+XA.setLanguage = function (lang) {
+  XA.lang = lang === 'en' ? 'en' : 'zh';
+  try { localStorage.setItem('xa_language', XA.lang); } catch (e) {}
+  if (XA.clearWeather) XA.clearWeather();
+  XA.applyI18n();
+  if (XA.updateWeather) XA.updateWeather();
+};
+var origOpenSheet = XA.openSheet;
+XA.openSheet = function (html) {
+  origOpenSheet.apply(XA, arguments);
+  XA.applyI18n();
+};
+
+XA.playlists = {
+  night: {
+    name: '夜行歌单',
+    tracks: [
+      { title: '夜航', artist: '安星电台 · 夜行歌单', subtitle: '给独行路上的一点温柔', lyric: '路灯把影子拉得很长，风吹散一整天的慌张 · 跟着节拍慢慢走', duration: 372, src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', coverClass: 'cover-night' },
+      { title: '城市微光', artist: '安星电台 · 城市漫游', subtitle: '车流与人声都变得柔软', lyric: '每一盏灯都在替我说晚安，街角的风也学会了放慢脚步', duration: 364, src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', coverClass: 'cover-city-glow' },
+      { title: '晚风频道', artist: '安星电台 · 慢走节拍', subtitle: '把步调交给晚风', lyric: '不用走得很快，晚风会替你把答案轻轻带来', duration: 321, src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', coverClass: 'cover-rain' }
+    ]
+  },
+  rain: {
+    name: '雨夜白噪音',
+    tracks: [
+      { title: '街声雨夜', artist: 'SoundImage · 环境声', subtitle: '远处车流与伞面雨声', lyric: '街声落在伞上，脚步轻轻，世界只剩下安稳的雨声', duration: 20, src: 'https://soundimage.org/wp-content/uploads/2022/06/Street-Ambience_6-6-22.mp3', coverClass: 'cover-rain' },
+      { title: '屋檐轻雨', artist: '安星白噪音 · 概念音轨', subtitle: '低压放松 · 适合慢走与入睡', lyric: '雨滴沿着屋檐慢慢滑落，把一天的紧绷一点点带走', duration: 20, src: 'https://soundimage.org/wp-content/uploads/2022/06/Street-Ambience_6-6-22.mp3', coverClass: 'cover-rain' }
+    ]
+  }
+};
+XA.activePlaylist = 'night';
+XA.tracks = XA.playlists.night.tracks.slice();
+XA.musicSource = 'local';
+XA.books = [
+  { title: '夜行便利店', author: '林间晚风', tags: '#都市治愈 #温暖夜归', coverClass: 'book-c1', coverWord: '夜行便利店', icon: 'pin', chapters: [
+    { title: '第 1 章 · 深夜的第一盏灯', text: '城市的夜色像一条缓慢流动的河。林夏走进街角便利店时，门口的风铃轻轻响了一声。热柜里最后一盒饭团还冒着热气，店员笑着点点头：今天也辛苦了。' },
+    { title: '第 2 章 · 会发光的小事', text: '她把雨伞靠在门边，听见收音机里播放着旧歌。那些看似微小的善意，像货架上的小灯，悄悄照亮了她回家的路。' }
+  ] },
+  { title: '雨停之前', author: '苏禾', tags: '#青春治愈 #雨天', coverClass: 'book-c2', coverWord: '雨停之前', icon: 'music', chapters: [
+    { title: '第 1 章 · 伞下的约定', text: '雨下了一整个下午。周迟站在教学楼门口，看着她从雨幕里跑来，伞沿滴下的水珠在台阶上碎成小小的花。' },
+    { title: '第 2 章 · 写给明天的信', text: '他们在便利店的便签纸上写下各自想说的话，然后把纸折成小船，放进雨后积水的路面。' }
+  ] },
+  { title: '林间小屋', author: '北岛木木', tags: '#荒野建造 #慢生活', coverClass: 'book-c3', coverWord: '林间小屋', icon: 'shield', chapters: [
+    { title: '第 1 章 · 第一根原木', text: '清晨的雾气停在树梢。他把第一根原木扛上山脊，阳光穿过叶缝落在手背上，像一种安静的鼓励。' },
+    { title: '第 2 章 · 炉火升起', text: '傍晚，小屋有了第一面墙。火光跳动，松木的香气混着雨后的泥土气息，让人忘记城市的喧闹。' }
+  ] },
+  { title: '山海食铺', author: '阿梨', tags: '#美食治愈 #人间烟火', coverClass: 'book-c4', coverWord: '山海食铺', icon: 'pin', chapters: [
+    { title: '第 1 章 · 一碗热汤', text: '海边的风带着咸味。小铺门口挂着旧灯箱，汤锅咕嘟咕嘟地响，第一碗热汤端上来时，旅程忽然变得柔软。' },
+    { title: '第 2 章 · 夜里来的客人', text: '深夜来的客人多半不急着说话。老板娘只是盛好饭，再放一小碟腌菜，许多疲惫就这样被慢慢安慰。' }
+  ] },
+  { title: '城市微光', author: '沈砚', tags: '#都市悬疑 #温柔反转', coverClass: 'book-c5', coverWord: '城市微光', icon: 'navigation', chapters: [
+    { title: '第 1 章 · 失物招领', text: '地铁站的失物招领处有一把旧钥匙，标签上写着：请在下雨天打开。她盯着那行字，忽然想起三年前的那个夜晚。' },
+    { title: '第 2 章 · 第九盏路灯', text: '沿着栗庙路往前走，第九盏路灯下停着一辆自行车。车篮里有一封没有寄出的信。' }
+  ] },
+  { title: 'AI 恋人说明书', author: '鹤川', tags: '#轻科幻 #爽文', coverClass: 'book-c6', coverWord: 'AI 恋人', icon: 'play', chapters: [
+    { title: '第 1 章 · 开机第一天', text: '清晨六点，客厅里的机器人轻声说：早安，今天也要好好生活。它不知道，这句话会改变一整个夏天。' },
+    { title: '第 2 章 · 学会犹豫', text: '当它第一次说“我不确定”时，林栀忽然觉得，这个世界上也许真的多了一个会思考的人。' }
+  ] }
+];
+XA.bookOrder = XA.books.map(function (_, i) { return i; });
+XA.bookTab = 'featured';
+XA._bookFeed = XA.books.slice();
+XA.fanqie = { loggedIn: false, phone: '', nickname: '番茄用户', code: '' };
+XA.fanqieBooks = [];
+XA.fanqieBooksDemo = [
+  { title: '我的书架 · 夜行便利店', author: '林间晚风', tags: '#书架 #治愈', coverClass: 'book-c1', coverWord: '我的书架', icon: 'pin', chapters: [
+    { title: '第 1 章 · 深夜的第一盏灯', text: '城市的夜色像一条缓慢流动的河。林夏走进街角便利店时，门口的风铃轻轻响了一声。' }
+  ] },
+  { title: '我的书架 · 山海食铺', author: '阿梨', tags: '#书架 #美食', coverClass: 'book-c4', coverWord: '继续听', icon: 'music', chapters: [
+    { title: '第 1 章 · 一碗热汤', text: '海边的风带着咸味。小铺门口挂着旧灯箱，汤锅咕嘟咕嘟地响，旅程忽然变得柔软。' }
+  ] }
+];
+function fqEsc(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+XA.loadFanqie = function () {
+  try {
+    var d = JSON.parse(localStorage.getItem('xa_fanqie'));
+    if (d) Object.assign(XA.fanqie, d);
+    var v = JSON.parse(localStorage.getItem('xa_fanqie_books'));
+    if (Array.isArray(v)) XA.fanqieBooks = v.slice(0, 12);
+  } catch (e) {}
+  if (XA.renderFanqieAccount) XA.renderFanqieAccount();
+  if (XA.renderFanqieBooks) XA.renderFanqieBooks();
+};
+XA.saveFanqie = function () { try { localStorage.setItem('xa_fanqie', JSON.stringify(XA.fanqie)); } catch (e) {} };
+XA.saveFanqieBooks = function () { try { localStorage.setItem('xa_fanqie_books', JSON.stringify(XA.fanqieBooks)); } catch (e) {} };
+XA.renderFanqieAccount = function () {
+  var btn = XA.$('#fanqieAccountBtn');
+  if (btn) {
+    btn.textContent = XA.fanqie.loggedIn ? XA.t('fanqieLoggedIn') : XA.t('fanqieLogin');
+    btn.classList.toggle('logged', !!XA.fanqie.loggedIn);
+  }
+  var sub = XA.$('#fanqieAccountSub');
+  if (sub) sub.textContent = XA.fanqie.loggedIn ? (XA.fanqie.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') + ' · ' + XA.t('fanqieFeatured')) : XA.t('fanqieLoginSub');
+};
+XA.renderFanqieBooks = function () {
+  var grid = XA.$('#fanqieBookGrid');
+  if (!grid) return;
+  var mine = XA.bookTab === 'favorites';
+  var list = mine ? (XA.fanqieBooks || []) : XA.bookOrder.map(function (i) { return XA.books[i]; }).filter(Boolean);
+  XA._bookFeed = list;
+  if (!list.length) {
+    grid.innerHTML = '<button class="bk-empty" data-action="fanqie-add">' + ic('play') +
+      '<b>' + XA.t('fanqieNoCustom') + '</b><small>' + XA.t('syncBookshelfTip') + '</small></button>';
+    return;
+  }
+  grid.innerHTML = list.map(function (b, i) {
+    return '<button class="book-card" data-action="open-book" data-book="' + i + '" data-source="' + (mine ? 'favorites' : 'featured') + '">' +
+      '<span class="bk-cover ' + (b.coverClass || 'book-c1') + '"><span class="bk-cover-ico">' + ic(b.icon || 'play') + '</span>' +
+      '<span class="bk-cover-word">' + fqEsc(b.coverWord || '伴行听书') + '</span></span>' +
+      '<span class="bk-play">' + ic('play') + '</span>' +
+      '<span class="bk-info"><b>' + fqEsc(b.title) + '</b><small>' + fqEsc(b.tags || b.author || '') + '</small></span>' +
+      '<span class="bk-badge' + (mine ? ' mine' : '') + '">' + (mine ? XA.t('fanqieCustom') : XA.t('fanqieFeatured')) + '</span></button>';
+  }).join('');
+  XA.$$('[data-action="book-tab"]').forEach(function (el) {
+    el.classList.toggle('active', el.dataset.tabType === XA.bookTab);
+  });
+};
+XA.refreshFeaturedBooks = function () {
+  XA.bookOrder = XA.books.map(function (_, i) { return i; });
+  for (var i = XA.bookOrder.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = XA.bookOrder[i]; XA.bookOrder[i] = XA.bookOrder[j]; XA.bookOrder[j] = t;
+  }
+  XA.bookTab = 'featured';
+  XA.renderFanqieBooks();
+};
+XA.currentBookIndex = 0;
+XA.currentChapterIndex = 0;
+XA.bookPlaying = false;
+XA.bookProgress = 0;
+XA.bookSpeed = 1;
+XA.bookTimer = null;
+XA.stopBookPlayback = function () {
+  XA.bookPlaying = false;
+  if (XA.bookTimer) { clearInterval(XA.bookTimer); XA.bookTimer = null; }
+  try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+};
+XA.startBookTimer = function () {
+  if (XA.bookTimer) clearInterval(XA.bookTimer);
+  XA.bookTimer = setInterval(function () {
+    XA.bookProgress = Math.min(100, XA.bookProgress + 1);
+    XA.paintBookPlayer();
+    if (XA.bookProgress >= 100) XA.actions['book-nav']({ dataset: { step: '1' } });
+  }, 900);
+};
+XA.speakCurrentChapter = function () {
+  if (!XA.bookPlaying || !window.speechSynthesis) return;
+  var list = XA._bookFeed || XA.books;
+  var book = list[XA.currentBookIndex];
+  if (!book || !book.chapters[XA.currentChapterIndex]) return;
+  try {
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(book.chapters[XA.currentChapterIndex].text);
+    u.lang = 'zh-CN'; u.rate = XA.bookSpeed;
+    u.onend = function () { if (XA.bookPlaying) XA.actions['book-nav']({ dataset: { step: '1' } }); };
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+};
+XA.paintBookPlayer = function () {
+  var list = XA._bookFeed || XA.books;
+  var book = list[XA.currentBookIndex];
+  if (!book) return;
+  var chapter = book.chapters[XA.currentChapterIndex];
+  var set = function (sel, val) { var el = XA.$(sel); if (el) el.textContent = val; };
+  set('#bookTitle', book.title);
+  set('#bookAuthor', book.author + ' · ' + XA.t('fanqieFeatured'));
+  set('#bookChapterTitle', chapter.title);
+  set('#bookText', chapter.text);
+  var status = XA.$('#bookPlayStatus');
+  if (status) status.textContent = XA.bookPlaying ? XA.t('listening') : XA.t('paused');
+  var btn = XA.$('[data-action="book-toggle"]');
+  if (btn) btn.innerHTML = ic(XA.bookPlaying ? 'pause' : 'play');
+  var bar = XA.$('#bookProgress');
+  if (bar) bar.style.width = Math.min(100, XA.bookProgress) + '%';
+  XA.$$('[data-book-speed]').forEach(function (el) {
+    el.classList.toggle('active', Number(el.dataset.bookSpeed) === XA.bookSpeed);
+  });
+};
+XA.openBookPlayer = function (index) {
+  var list = XA._bookFeed || XA.books;
+  var i = Math.max(0, Math.min(list.length - 1, Number(index) || 0));
+  var book = list[i];
+  if (!book) return;
+  XA.currentBookIndex = i;
+  XA.currentChapterIndex = 0;
+  XA.bookProgress = 0;
+  XA.stopBookPlayback();
+  XA.openSheet('<div class="book-safety">' + ic('shield') + '<span data-i18n="bookSafety">导航中 · 安全分 92 · 感知开启</span><span class="book-live">LIVE</span></div>' +
+    '<div class="book-cover-lg ' + (book.coverClass || 'book-c1') + '"><span class="bk-cover-ico">' + ic(book.icon || 'play') + '</span><b>' + fqEsc(book.coverWord || book.title) + '</b></div>' +
+    '<div class="book-sheet-meta"><h3 id="bookTitle">' + fqEsc(book.title) + '</h3><small id="bookAuthor">' + fqEsc(book.author) + ' · ' + XA.t('fanqieFeatured') + '</small></div>' +
+    '<div class="book-chapter-head"><b id="bookChapterTitle">' + fqEsc(book.chapters[0].title) + '</b><span id="bookPlayStatus">' + XA.t('paused') + '</span></div>' +
+    '<p class="book-text" id="bookText">' + fqEsc(book.chapters[0].text) + '</p>' +
+    '<div class="book-progress"><span id="bookProgress" style="width:0%"></span></div>' +
+    '<div class="book-controls">' +
+    '<button data-action="book-nav" data-step="-1">' + ic('back') + '<span data-i18n="prevChapter">上一章</span></button>' +
+    '<button class="book-play" data-action="book-toggle">' + ic('play') + '</button>' +
+    '<button data-action="book-nav" data-step="1">' + ic('chevron') + '<span data-i18n="nextChapter">下一章</span></button></div>' +
+    '<div class="book-speed-row"><span>倍速</span><button data-book-speed="0.75">0.75x</button><button class="active" data-book-speed="1">1.0x</button><button data-book-speed="1.25">1.25x</button><button data-book-speed="1.5">1.5x</button></div>' +
+    '<p class="sheet-note">' + XA.t('bookPlayTip') + ' ' + XA.t('bookDemoTip') + '</p>');
+  var sheet = XA.$('#modalLayer .sheet');
+  if (sheet) sheet.classList.add('book-sheet');
+  XA.paintBookPlayer();
+};
+XA.trackIndex = 0;
+XA.progressSec = 102;
+XA.playing = false;
+XA.audio = null;
+XA.ensureAudio = function () {
+  if (!XA.audio) {
+    XA.audio = new Audio();
+    XA.audio.preload = 'metadata';
+    XA.audio.addEventListener('timeupdate', function () {
+      XA.progressSec = Math.floor(XA.audio.currentTime);
+      XA.updatePlayer();
+    });
+    XA.audio.addEventListener('loadedmetadata', function () { XA.updatePlayer(); });
+    XA.audio.addEventListener('ended', function () { XA.setTrack(1); });
+  }
+  return XA.audio;
+};
+
+XA.updatePlayer = function () {
+  var t = XA.tracks[XA.trackIndex];
+  var set = function (sel, val) { var el = XA.$(sel); if (el) el.textContent = val; };
+  set('#trackTitle', t.title);
+  set('#trackArtist', t.artist);
+  set('#trackSubtitle', t.subtitle || '安星电台 · 概念演示');
+  set('#trackLyric', t.lyric);
+  var fmt = function (s) { return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0'); };
+  var dur = (XA.audio && isFinite(XA.audio.duration) && XA.audio.duration > 0) ? XA.audio.duration : t.duration;
+  var pct = Math.min(100, XA.progressSec / dur * 100);
+  set('#trackCurrent', fmt(XA.progressSec));
+  set('#trackDuration', fmt(dur));
+  var bar = XA.$('#trackProgress');
+  if (bar) bar.style.width = pct + '%';
+  var vinyl = XA.$('#vinyl');
+  if (vinyl) {
+    vinyl.style.setProperty('--progress', pct + '%');
+    vinyl.classList.toggle('playing', XA.playing);
+    vinyl.className = 'vinyl ' + (t.coverClass || 'cover-night') + (XA.playing ? ' playing' : '');
+  }
+  var marquee = XA.$('.lyric-marquee');
+  if (marquee) marquee.classList.toggle('playing', XA.playing);
+  var vinylLabel = XA.$('.vinyl>span b');
+  if (vinylLabel) vinylLabel.textContent = t.title;
+  var source = XA.$('#musicSourceLabel');
+  if (source) source.textContent = XA.t(XA.musicSource === 'netease' ? 'sourceNetease' : XA.musicSource === 'qq' ? 'sourceQQ' : 'sourceLocal');
+  var btn = XA.$('[data-action="play"]');
+  if (btn) btn.innerHTML = ic(XA.playing ? 'pause' : 'play');
+};
+
+XA.setTrack = function (delta) {
+  XA.trackIndex = (XA.trackIndex + delta + XA.tracks.length) % XA.tracks.length;
+  XA.progressSec = 0;
+  var a = XA.ensureAudio();
+  a.pause();
+  a.src = XA.tracks[XA.trackIndex].src;
+  a.load();
+  if (XA.playing) a.play().catch(function () {});
+  XA.updatePlayer();
+  XA.toast('已切换到《' + XA.tracks[XA.trackIndex].title + '》');
+};
+
+XA.renderPlaylistCards = function () {
+  XA.$$('[data-playlist-card]').forEach(function (el) {
+    el.classList.toggle('active', el.dataset.playlistCard === XA.activePlaylist);
+  });
+};
+XA.openPlaylist = function (key) {
+  var pl = XA.playlists[key];
+  if (!pl) return;
+  XA.openSheet('<h3>' + (XA.lang === 'en' ? (key === 'rain' ? XA.t('playlistRain') : XA.t('playlistNight')) : pl.name) +
+    '</h3><div class="sheet-sub">' + pl.tracks.length + (XA.lang === 'en' ? ' tracks · ' : ' 首 · ') + XA.t('playlistHint') + '</div>' +
+    pl.tracks.map(function (t, i) {
+      return '<button class="playlist-item" data-action="play-playlist-track" data-playlist="' + key + '" data-track-index="' + i + '">' +
+        '<span class="playlist-index">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<span class="playlist-copy"><b>' + fqEsc(t.title) + '</b><small>' + fqEsc(t.artist) + ' · ' + fqEsc(t.subtitle || '') + '</small></span>' +
+        '<span class="playlist-play">' + ic('play') + '<em>' + XA.t('playTrack') + '</em></span></button>';
+    }).join(''));
+};
+XA.playPlaylistTrack = function (key, index) {
+  var pl = XA.playlists[key];
+  if (!pl || !pl.tracks[index]) return;
+  XA.activePlaylist = key;
+  XA.tracks = pl.tracks.slice();
+  XA.trackIndex = index;
+  XA.progressSec = 0;
+  var a = XA.ensureAudio();
+  a.pause(); a.src = pl.tracks[index].src; a.load();
+  XA.playing = true;
+  a.play().catch(function () { XA.toast(XA.lang === 'en' ? 'Playback was blocked, tap play again' : '音频播放被拦截，请再次点击播放'); });
+  XA.updatePlayer(); XA.renderPlaylistCards(); XA.closeModal();
+  XA.toast('正在播放《' + pl.tracks[index].title + '》' + (key === 'rain' ? ' · ' + XA.t('setWhiteNoise') : ''));
+};
+
+XA.openExternalMusic = function (source) {
+  var cfg = source === 'netease'
+    ? { scheme: 'orpheus://', web: 'https://music.163.com/' }
+    : { scheme: 'qqmusic://', web: 'https://y.qq.com/' };
+  var began = Date.now();
+  try { window.location.href = cfg.scheme; } catch (e) {}
+  setTimeout(function () {
+    if (!document.hidden && Date.now() - began < 2500) window.location.href = cfg.web;
+  }, 900);
+};
+
+XA.navSteps = [
+  { title: '前方 30 m 右转进入栗庙路', sub: '全程有灯 · 路灯覆盖 86%', dist: '30 m', icon: 'navigation' },
+  { title: '沿栗庙路直行 400 m', sub: '监控 12 处 · 近 30 天事件 2 起', dist: '400 m', icon: 'navigation' },
+  { title: '前方路口左转进入花园路', sub: '便利店求助点 · 照明良好', dist: '120 m', icon: 'pin' },
+  { title: '即将到达 藏龙东街地铁站 · 东南门', sub: '已为你照亮最后五百米', dist: '60 m', icon: 'check' }
+];
+
+/* 两套独立导航页：phone = 普通手机导航（无任何 AR 标识），ar = AR 眼镜外设导航 */
+XA.startNavigation = function (mode) {
+  var ar = mode === 'ar';
+  XA.navMode = ar ? 'ar' : 'phone';
+  var old = XA.$('.nav-session');
+  if (old) old.remove();
+  clearInterval(XA.navTimer);
+  var box = document.createElement('div');
+  box.className = 'nav-session ' + (ar ? 'ar-nav pure-nav' : 'phone-nav');
+
+  var map = '<div class="nav-map">' +
+      '<svg viewBox="0 0 390 320" preserveAspectRatio="none">' +
+        '<path class="nv-road" d="M-10 260 C90 240 150 180 220 130 S320 80 410 40"/>' +
+        '<path class="nv-road" d="M-10 110 C100 130 190 180 260 250 S330 300 410 310"/>' +
+        '<path class="nv-route" d="M40 300 C110 270 150 205 205 160 S290 110 350 60"/>' +
+      '</svg>' +
+      '<span class="nv-user"></span>';
+
+  if (ar) {
+    map += '<div class="ar-nav-panel">' +
+        '<div class="ar-nav-top"><span class="ar-nav-badge">AR 眼镜导航 · XA-0281</span><span class="ar-nav-live" id="arNavLive">' + (XA.position && XA.position.real ? '实时定位已联动' : '等待实时定位') + '</span></div>' +
+        '<div class="nav-turn"><span class="turn-arrow">' + ic('navigation') + '</span>' +
+          '<div><b id="turnTitle">前方 30 m 右转进入栗庙路</b><small id="turnSub">全程有灯 · 路灯覆盖 86%</small></div>' +
+          '<span class="turn-dist"><b id="turnDist">30</b><em>米</em></span></div>' +
+        '<div class="nav-mini-stats">' +
+          '<span><b id="navDist">1.2</b><small data-i18n="remainingKm">剩余公里</small></span>' +
+          '<span><b id="navRemain">18</b><small data-i18n="remainingMin">剩余分钟</small></span>' +
+        '</div>' +
+      '</div>';
+  } else {
+    /* 普通导航：转折点距离 + 剩余距离 + 剩余时长，无安全分、无 AR 标识 */
+    map += '<div class="nav-info-panel">' +
+        '<div class="nav-info-main">' +
+          '<span class="nav-info-icon">' + ic('navigation') + '</span>' +
+          '<span class="nav-info-turn"><small>距转折点</small><b id="turnDist">30</b><em>米</em></span>' +
+          '<span class="nav-info-copy"><b id="turnTitle">前方右转进入栗庙路</b><small id="turnSub">全程有灯 · 路灯覆盖 86%</small></span>' +
+        '</div>' +
+        '<div class="nav-info-sub">' +
+          '<span><small>剩余距离</small><b><i id="navDist">1.2</i> km</b></span>' +
+          '<span><small>剩余时长</small><b><i id="navRemain">18</i> 分钟</b></span>' +
+        '</div>' +
+      '</div>';
+  }
+  map += '</div>';
+
+  /* 两套导航页都不放置下半屏步骤面板，避免遮挡地图路线 */
+  var body = '';
+
+  box.innerHTML = map + body +
+    '<button class="nav-end-big" data-action="end-nav">' + ic('close') + '<span data-i18n="endNav">退出导航</span></button>';
+  XA.$('#phone').appendChild(box);
+  XA.applyI18n();
+  requestAnimationFrame(function () { box.classList.add('open'); });
+
+  var i = 0;
+  function paint() {
+    var step = XA.navSteps[i];
+    var set = function (sel, val) { var el = XA.$(sel, box); if (el) el.textContent = val; };
+    set('#turnTitle', step.title);
+    set('#turnSub', step.sub);
+    set('#turnDist', String(step.dist).replace(/[^\d.]/g, '') || '30');
+    set('#navRemain', Math.max(1, 18 - i * 4));
+    set('#navDist', Math.max(0.1, 1.2 - i * 0.3).toFixed(1));
+    var arrow = XA.$('.nav-info-icon .ico, .turn-arrow .ico', box);
+    if (arrow) arrow.style.transform = i === 2 ? 'rotate(-90deg)' : (i === 3 ? 'rotate(0)' : 'rotate(45deg)');
+    XA.$$('.nav-step', box).forEach(function (el, j) {
+      el.classList.toggle('done', j < i);
+      el.classList.toggle('active', j === i);
+    });
+  }
+  paint();
+  XA.navTimer = setInterval(function () {
+    i++;
+    if (i >= XA.navSteps.length) {
+      clearInterval(XA.navTimer);
+      XA.toast('路线指引已结束 · 请观察现场并主动结束导航');
+      return;
+    }
+    paint();
+    XA.toast(XA.navSteps[i].title);
+  }, 4000);
+  XA.toast(ar ? 'AR 眼镜导航已开始 · 抬头看路' : '安全导航已开始 · 安星陪你走夜路');
+};
+
+var _earlyActions = XA.actions;   // 保留 app.js 中提前注册的取消报警身份验证动作
+XA.actions = {
+  notifications: function () {
+    XA.openSheet('<h3>守护通知</h3><div class="sheet-sub">安全消息优先送达</div>' +
+      '<div class="option-row">' + ic('warning') + '<span><b>藏龙支路路灯检修</b><small>2 分钟前 · 建议绕行栗庙路</small></span></div>' +
+      '<div class="option-row">' + ic('shield') + '<span><b>夜间守护已开启</b><small>今晚 21:00 · 已连续 3 晚</small></span></div>' +
+      '<div class="option-row">' + ic('glasses') + '<span><b>AR 眼镜电量 82%</b><small>18 分钟前 · 设备状态正常</small></span></div>');
+  },
+  language: function () {
+    XA.openSheet('<h3 data-i18n="language">管理语言</h3><div class="sheet-sub" data-i18n="languageSub">选择应用显示语言</div>' +
+      '<button class="option-row" data-lang="zh">' + ic('check') + '<span><b data-i18n="languageChinese">简体中文</b><small>Chinese (Simplified)</small></span></button>' +
+      '<button class="option-row" data-lang="en">' + ic('glasses') + '<span><b data-i18n="languageEnglish">English</b><small>English interface</small></span></button>');
+  },
+  search: function () {
+    var names = ['藏龙东街地铁站', '栗庙路夜市', '藏龙岛湿地公园', '湖北美术学院南门', '光谷广场', '家'];
+    XA.openSheet('<h3>搜索目的地</h3><div class="sheet-sub">输入关键词，选择后会同步更新路线分析</div>' +
+      '<input id="searchInput" class="sheet-input" style="min-height:auto;height:44px" placeholder="搜索地点或常用地址" autocomplete="off">' +
+      '<div id="searchResults">' + names.map(function (n) {
+        return '<button class="option-row" data-pick="' + n + '">' + ic('pin') + '<span><b>' + n + '</b><small>步行可达 · 夜间路线已计算</small></span>' + ic('chevron') + '</button>';
+      }).join('') + '</div>' +
+      '<button class="primary-btn" data-action="close-pick">使用当前位置附近推荐</button>');
+    var input = XA.$('#searchInput');
+    if (input) {
+      input.addEventListener('input', function () {
+        var q = input.value.trim();
+        XA.$$('#searchResults [data-pick]').forEach(function (el) {
+          el.style.display = (!q || el.dataset.pick.indexOf(q) !== -1) ? '' : 'none';
+        });
+      });
+      setTimeout(function () { input.focus(); }, 260);
+    }
+    XA.$$('[data-pick]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        XA.setDestination(el.dataset.pick);
+        XA.closeModal();
+        XA.toast('目的地已更新为 ' + el.dataset.pick);
+      });
+    });
+  },
+  'close-pick': function () { XA.closeModal(); },
+  'score-detail': function () {
+    XA.openSheet('<h3>安全分由什么构成</h3><div class="sheet-sub">栗庙路主线 · 21:40 更新 · 演示数据</div>' +
+      [['路灯覆盖', 30], ['监控与求助点', 20], ['实时事件', 25], ['人流与商业活跃度', 15], ['路线类型', 10]].map(function (r) {
+        return '<div class="weight-row"><div><span>' + r[0] + '</span><b>' + r[1] + '%</b></div><div class="weight-bar"><i style="width:' + (r[1] * 3) + '%"></i></div></div>';
+      }).join('') +
+      '<p class="sheet-note">安全分是可观测环境因素的加权表达，不是犯罪预测，也不代表绝对安全。数据不足时会显示“数据不足”，不会给出看似精确的高分。</p>');
+  },
+  layer: function (el) {
+    var on = document.body.classList.toggle('light-layer-on');
+    el.classList.toggle('active', on);
+    XA.toast(on ? '路灯图层已开启 · 显示 86% 照明覆盖' : '路灯图层已关闭');
+  },
+  bulb: function () { XA.openSheet('<h3>路灯信息</h3><div class="sheet-sub">城市照明数据 · 21:39 更新</div>' +
+    '<div class="option-row">' + ic('warning') + '<span><b>藏龙支路 300m 处路灯检修</b><small>预计 22:30 恢复 · 建议绕行栗庙路</small></span></div>' +
+    '<div class="option-row">' + ic('check') + '<span><b>栗庙路主线全程有灯</b><small>覆盖率 86% · 12 处监控</small></span></div>'); },
+  'event-detail': function () {
+    XA.openSheet('<h3>实时事件详情</h3><div class="sheet-sub">来源：城市照明 / 用户上报 · 2 分钟前</div>' +
+      '<div class="option-row">' + ic('warning') + '<span><b>藏龙支路 300m 路灯检修</b><small>影响藏龙支路捷径 B 线，A 线栗庙路不受影响</small></span></div>' +
+      '<button class="primary-btn" data-action="accept-advice">采纳建议 · 改走栗庙路</button>');
+  },
+  'accept-advice': function () { XA.closeModal(); XA.selectRoute('A'); XA.go('route'); },
+  'ai-suggest': function () {
+    XA.openSheet('<h3>安星 AI</h3><div class="sheet-sub">陪你走夜路 · 短句、具体、不夸张</div>' +
+      '<div class="option-row">' + ic('navigation') + '<span><b>今晚走栗庙路吧</b><small>路灯更亮，比藏龙支路多 3 分钟，安全分 +28</small></span></div>' +
+      '<div class="option-row">' + ic('check') + '<span><b>已为你避开暗巷</b><small>路线经过 12 处监控、3 个便利店求助点</small></span></div>' +
+      '<button class="primary-btn" data-action="accept-advice">好的，走栗庙路</button>');
+  },
+  'start-nav': function () { XA.startNavigation('phone'); },
+  'start-ar-nav': function () { XA.startNavigation('ar'); },
+  'end-nav': function () {
+    var nav = XA.$('.nav-session');
+    if (nav) { nav.classList.remove('open'); setTimeout(function () { nav.remove(); }, 360); }
+    clearInterval(XA.navTimer);
+    XA.toast('已退出导航 · 行程记录已保存');
+  },
+  'nav-share': function () { XA.actions['share-trip'](); },
+  'share-trip': function () {
+    XA.openSheet('<h3>分享行程</h3><div class="sheet-sub">仅分享行程级信息，不暴露实时精确轨迹</div>' +
+      '<div class="option-row">' + ic('users') + '<span><b>紧急联系人（3 位）</b><small>妈妈、阿哲、物业管家</small></span></div>' +
+      '<div class="option-row">' + ic('share') + '<span><b>生成行程卡片</b><small>模糊具体住址与时间</small></span></div>' +
+      '<button class="primary-btn" data-action="shared">确认分享行程</button>');
+  },
+  shared: function () { XA.closeModal(); XA.toast('行程已分享给 3 位紧急联系人'); },
+
+  /* 3.0 分级求救：按危险程度选择，避免「不确定就报警」的小题大做感 */
+  help: function () {
+    XA.closeModal();
+    XA.openSheet(
+      '<h3>你需要哪种帮助？</h3>' +
+      '<div class="sheet-sub">先按现在的感受选一个等级 · 随时可以升级到 SOS，不必担心小题大做</div>' +
+
+      '<button class="help-level lv-share" data-action="help-share">' +
+        '<span class="help-level-ico">' + ic('users') + '</span>' +
+        '<span class="help-level-body">' +
+          '<span class="help-level-top"><b>有点不安 · 先共享位置</b><em>轻度</em></span>' +
+          '<small>把我的实时位置发给 3 位紧急联系人，他们能看到我在哪。<b>不报警、不打扰警方</b>——像"有人跟了我一段路"这种情况，用这个就好。</small>' +
+        '</span>' +
+        ic('chevron') +
+      '</button>' +
+
+      '<button class="help-level lv-sos" data-action="help-sos">' +
+        '<span class="help-level-ico">' + ic('siren') + '</span>' +
+        '<span class="help-level-body">' +
+          '<span class="help-level-top"><b>确认危险 · SOS 报警</b><em>紧急</em></span>' +
+          '<small>立即通知联系人并报警、开启录音，进入 6 秒可取消倒计时。<b>仅在真实危险时使用</b>。</small>' +
+        '</span>' +
+        ic('chevron') +
+      '</button>' +
+
+      '<p class="sheet-note">不确定的时候，先共享位置就够了。共享后若情况变化，可随时从首页升级到 SOS。</p>'
+    );
+  },
+
+  /* 轻度：实时位置共享给紧急联系人，不报警 */
+  'help-share': function () {
+    XA.closeModal();
+    XA.openSheet(
+      '<h3>共享实时位置</h3>' +
+      '<div class="sheet-sub">只让信任的人知道"我在哪"，不触发报警</div>' +
+      '<div class="option-row">' + ic('users') + '<span><b>紧急联系人（3 位）</b><small>妈妈、阿哲、物业管家</small></span></div>' +
+      '<div class="option-row">' + ic('pin') + '<span><b>实时位置 · 精度 ±5m</b><small>持续共享，直到你手动停止</small></span></div>' +
+      '<div class="option-row">' + ic('shield') + '<span><b>不报警、不录音</b><small>仅位置共享，随时可停止</small></span></div>' +
+      '<button class="primary-btn" data-action="help-share-confirm">确认共享位置</button>' +
+      '<button class="ghost-btn" data-action="help-share-stop" style="margin-top:8px">取消，什么都不做</button>'
+    );
+  },
+  'help-share-confirm': function () {
+    XA.closeModal();
+    XA.locationShared = true;
+    XA.toast('实时位置已共享给 3 位联系人 · 不报警', 'success');
+  },
+  'help-share-stop': function () { XA.closeModal(); XA.toast('已取消 · 未共享位置', 'info'); },
+
+  /* 紧急：进入原有 SOS 确认 + 倒计时流程 */
+  'help-sos': function () { XA.closeModal(); XA.showSosConfirm(); },
+
+  sos: function () { XA.closeModal(); XA.showSosConfirm(); },
+  'sos-guide': function () {
+    XA.openSheet('<h3>求助与兜底</h3><div class="sheet-sub">所有自动动作可取消、可解释、可关闭</div>' +
+      '<div class="option-row">' + ic('phone') + '<span><b>无法自动呼叫 110</b><small>会显示“请点击拨号”，不做虚假承诺</small></span></div>' +
+      '<div class="option-row">' + ic('pin') + '<span><b>定位不准或暂无网络</b><small>显示精度范围并缓存位置，尝试短信求助</small></span></div>' +
+      '<div class="option-row">' + ic('shield') + '<span><b>误报恢复</b><small>需人脸识别或密码验证后才能取消报警，记录保留可回看</small></span></div>');
+  },
+  'location-detail': function () {
+    XA.openSheet('<h3>当前位置</h3><div class="sheet-sub">已同步给 3 位紧急联系人 · 精度 ±5 m</div>' +
+      '<div class="option-row">' + ic('pin') + '<span><b>武汉市江夏区藏龙岛栗庙路 1 号</b><small>更新于 21:42:06 · 来源：GPS + 基站</small></span></div>' +
+      '<p class="sheet-note">定位仅用于本次紧急行程共享，报警结束后停止共享。</p>');
+  },
+  'cancel-alarm': function () {
+    if (XA.alarm && XA.showCancelAuth) XA.showCancelAuth();   // 报警发出后必须验证身份
+    else XA.cancelAlarm();
+  },
+  'ar-entry': function () { XA.go('ar'); },
+  play: function () {
+    XA.playing = !XA.playing;
+    var a = XA.ensureAudio();
+    if (!a.src) a.src = XA.tracks[XA.trackIndex].src;
+    if (XA.playing) a.play().catch(function () { XA.toast('音频播放被拦截，请再次点击播放'); });
+    else a.pause();
+    XA.updatePlayer();
+  },
+  prev: function () { XA.setTrack(-1); },
+  next: function () { XA.setTrack(1); },
+  volume: function () { var row = XA.$('#volumeRow'); if (row) row.classList.toggle('show'); },
+  'lyric-sync': function (el) {
+    var on = el.textContent.trim() === '已开启';
+    el.textContent = on ? '已关闭' : '已开启';
+    XA.toast(on ? '眼镜端歌词同步已关闭' : '眼镜端歌词同步已开启');
+  },
+  'open-playlist': function (el) { XA.openPlaylist((el && el.dataset.playlist) || 'night'); },
+  'play-playlist-track': function (el) {
+    XA.playPlaylistTrack((el && el.dataset.playlist) || 'night', parseInt((el && el.dataset.trackIndex) || '0', 10));
+  },
+  'music-source': function () {
+    XA.openSheet('<h3 data-i18n="musicSource">音源</h3><div class="sheet-sub" data-i18n="sourceSheetSub">选择音源；除本地歌单外均为概念跳转，播放器展示模拟数据。</div>' +
+      '<button class="option-row" data-action="music-source-set" data-source="local">' + ic('music') + '<span><b data-i18n="sourceLocal">安星本地歌单</b><small>真实音频播放 · 来自安星内置示例音源</small></span></button>' +
+      '<button class="option-row" data-action="music-source-set" data-source="netease">' + ic('play') + '<span><b data-i18n="sourceNetease">跳转网易云音乐</b><small>URL Scheme: orpheus://</small></span></button>' +
+      '<button class="option-row" data-action="music-source-set" data-source="qq">' + ic('play') + '<span><b data-i18n="sourceQQ">跳转 QQ 音乐</b><small>URL Scheme: qqmusic://</small></span></button>' +
+      '<p class="sheet-note">' + XA.t('sourceDemoTip') + '</p>');
+  },
+  'music-source-set': function (el) {
+    var source = (el && el.dataset.source) || 'local';
+    XA.musicSource = source;
+    XA.closeModal();
+    XA.updatePlayer();
+    if (source === 'local') XA.toast(XA.t('sourceLocalOn'));
+    else {
+      XA.toast(XA.t(source === 'netease' ? 'sourceNeteaseOn' : 'sourceQQOn'));
+      setTimeout(function () { XA.openExternalMusic(source); }, 260);
+    }
+  },
+  'open-book': function (el) {
+    if (!XA.fanqie.loggedIn) {
+      XA.toast(XA.t('fanqieLoginRequired'));
+      XA.actions['fanqie-login']();
+      return;
+    }
+    XA.openBookPlayer(parseInt((el && el.dataset.book) || '0', 10));
+  },
+  'book-tab': function (el) {
+    XA.bookTab = (el && el.dataset.tabType === 'favorites') ? 'favorites' : 'featured';
+    XA.renderFanqieBooks();
+  },
+  'book-refresh': function () {
+    XA.refreshFeaturedBooks();
+    XA.toast(XA.lang === 'en' ? 'Fresh novels loaded' : '已为你换一批小说');
+  },
+  'book-nav': function (el) {
+    var list = XA._bookFeed || XA.books;
+    var book = list[XA.currentBookIndex];
+    if (!book) return;
+    var wasPlaying = XA.bookPlaying;
+    var step = parseInt((el && el.dataset.step) || '1', 10);
+    var next = XA.currentChapterIndex + step;
+    if (next < 0 || next >= book.chapters.length) {
+      XA.currentBookIndex = (XA.currentBookIndex + (step > 0 ? 1 : -1) + list.length) % list.length;
+      XA.currentChapterIndex = step > 0 ? 0 : Math.max(0, list[XA.currentBookIndex].chapters.length - 1);
+    } else XA.currentChapterIndex = next;
+    XA.bookProgress = 0;
+    XA.stopBookPlayback();
+    XA.openBookPlayer(XA.currentBookIndex);
+    XA.currentChapterIndex = Math.max(0, Math.min(list[XA.currentBookIndex].chapters.length - 1, XA.currentChapterIndex));
+    XA.bookPlaying = wasPlaying;
+    XA.paintBookPlayer();
+    if (wasPlaying) { XA.speakCurrentChapter(); XA.startBookTimer(); }
+  },
+  'book-toggle': function () {
+    XA.bookPlaying = !XA.bookPlaying;
+    if (XA.bookPlaying) {
+      XA.speakCurrentChapter();
+      XA.startBookTimer();
+    } else {
+      XA.stopBookPlayback();
+    }
+    XA.paintBookPlayer();
+  },
+  'fanqie-login': function () {
+    if (XA.fanqie.loggedIn) {
+      XA.openSheet('<h3 data-i18n="fanqieLoggedIn">已登录番茄小说账号</h3><div class="sheet-sub">' + fqEsc(XA.fanqie.nickname) + ' · ' + XA.fanqie.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') + '</div>' +
+        '<div class="option-row">' + ic('check') + '<span><b data-i18n="fanqieFeatured">番茄精选</b><small data-i18n="fanqieLoginSub">登录后可收听番茄精选小说</small></span></div>' +
+        '<button class="primary-btn" data-action="fanqie-add" data-i18n="fanqieAdd">同步我的书架</button>' +
+        '<button class="login-skip" data-action="fanqie-logout" data-i18n="fanqieLogout">退出番茄小说</button>');
+      return;
+    }
+    XA.openSheet('<h3 data-i18n="fanqieLogin">登录番茄小说账号</h3><div class="sheet-sub" data-i18n="fanqieLoginSub">登录后可收听番茄精选小说</div>' +
+      '<label class="login-label" data-i18n="fanqiePhone">手机号</label>' +
+      '<input class="login-input" id="fanqiePhone" type="tel" maxlength="11" inputmode="numeric" placeholder="请输入 11 位手机号">' +
+      '<label class="login-label" data-i18n="fanqieCode">验证码</label>' +
+      '<div class="login-code-row"><input class="login-input" id="fanqieCode" type="text" maxlength="4" inputmode="numeric" placeholder="4 位验证码">' +
+      '<button class="code-btn" data-action="fanqie-code" data-i18n="fanqieGetCode">获取验证码</button></div>' +
+      '<button class="primary-btn" data-action="fanqie-do-login" data-i18n="fanqieLoginBtn">登录并继续</button>' +
+      '<button class="login-skip" data-action="fanqie-qr" data-i18n="fanqieQr">扫码登录</button>' +
+      '<p class="sheet-note">演示登录不会连接番茄小说服务器，账号状态仅保存在本机。</p>');
+  },
+  'fanqie-code': function () {
+    var p = ((XA.$('#fanqiePhone') || {}).value || '').trim();
+    if (!/^1\d{10}$/.test(p)) { XA.toast('手机号需为 1 开头的 11 位数字，请修改后重试', 'error'); return; }
+    XA.fanqie.phone = p;
+    XA.fanqie.code = String(Math.floor(1000 + Math.random() * 9000));
+    var ci = XA.$('#fanqieCode');
+    if (ci) ci.value = XA.fanqie.code;   // 与主登录流程一致：演示码自动填入
+    XA.saveFanqie();
+    XA.toast('验证码已发送（演示）：' + XA.fanqie.code + ' · 已自动填入', 'success');
+  },
+  'fanqie-do-login': function () {
+    var p = ((XA.$('#fanqiePhone') || {}).value || '').trim();
+    var c = ((XA.$('#fanqieCode') || {}).value || '').trim();
+    if (!/^1\d{10}$/.test(p)) { XA.toast('手机号需为 1 开头的 11 位数字，请修改后重试', 'error'); return; }
+    if (!XA.fanqie.code) { XA.toast('请先点击「获取验证码」，演示码会自动填入', 'warn'); return; }
+    if (c !== XA.fanqie.code) { XA.toast('验证码不正确，请重新点击「获取验证码」', 'error'); return; }
+    XA.fanqie.loggedIn = true; XA.fanqie.phone = p;
+    XA.fanqie.nickname = XA.fanqie.nickname || '番茄用户'; XA.fanqie.code = '';
+    XA.saveFanqie(); XA.renderFanqieAccount(); XA.closeModal();
+    XA.toast('番茄小说账号已登录（演示）', 'success');
+  },
+  'fanqie-qr': function () {
+    XA.openSheet('<h3 data-i18n="fanqieQr">扫码登录</h3><div class="sheet-sub" data-i18n="fanqieQrTip">请使用番茄小说 App 扫描二维码（演示）</div>' +
+      '<div class="fanqie-qr" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' +
+      '<button class="primary-btn" data-action="fanqie-qr-done" data-i18n="fanqieLoginBtn">登录并继续</button>' +
+      '<p class="sheet-note">原型使用模拟扫码，仅用于交互演示。</p>');
+  },
+  'fanqie-qr-done': function () {
+    XA.fanqie.loggedIn = true; XA.fanqie.phone = XA.fanqie.phone || '13800000000';
+    XA.fanqie.nickname = XA.fanqie.nickname || '番茄用户';
+    XA.saveFanqie(); XA.renderFanqieAccount(); XA.closeModal();
+    XA.toast('扫码登录成功（演示）');
+  },
+  'fanqie-logout': function () {
+    XA.fanqie.loggedIn = false; XA.fanqie.code = '';
+    XA.saveFanqie(); XA.renderFanqieAccount(); XA.closeModal();
+    XA.toast('已退出番茄小说（演示）');
+  },
+  'fanqie-add': function () {
+    if (!XA.fanqie.loggedIn) {
+      XA.toast(XA.t('fanqieLoginRequired')); XA.actions['fanqie-login'](); return;
+    }
+    XA.openSheet('<h3 data-i18n="fanqieAdd">同步我的书架</h3><div class="sheet-sub" data-i18n="syncBookshelfTip">演示同步：将番茄小说书架中的作品加入伴行页。</div>' +
+      '<button class="option-row" data-action="fanqie-sync" data-sync="bookshelf">' + ic('shield') + '<span><b data-i18n="syncBookshelf">同步我的书架</b><small>2 本 · 治愈 / 美食</small></span></button>' +
+      '<button class="option-row" data-action="fanqie-sync" data-sync="recent">' + ic('play') + '<span><b data-i18n="syncRecent">同步最近阅读</b><small>2 本 · 继续上次进度</small></span></button>' +
+      '<button class="option-row" data-action="fanqie-add-link">' + ic('plus') + '<span><b data-i18n="pasteBook">搜索并添加小说</b><small>输入书名即可加入演示书架</small></span></button>');
+  },
+  'fanqie-sync': function (el) {
+    var type = (el && el.dataset.sync === 'recent') ? 'recent' : 'bookshelf';
+    XA.fanqieBooks = XA.fanqieBooksDemo.map(function (b) {
+      return Object.assign({}, b, { title: (type === 'recent' ? '最近阅读 · ' : '我的书架 · ') + b.title.replace(/^我的书架\s*·\s*/, '') });
+    });
+    XA.bookTab = 'favorites';
+    XA.saveFanqieBooks(); XA.renderFanqieBooks(); XA.closeModal();
+    XA.toast(type === 'recent' ? '已同步最近阅读' : '已同步我的书架');
+  },
+  'fanqie-add-link': function () {
+    XA.openSheet('<h3 data-i18n="pasteBook">搜索并添加小说</h3><div class="sheet-sub">输入书名，加入演示书架（不请求真实书城）</div>' +
+      '<input class="login-input" id="fanqieBookName" placeholder="例如：雨停之前">' +
+      '<button class="primary-btn" data-action="fanqie-save" data-i18n="fanqieAddBtn">同步并收藏</button>');
+  },
+  'fanqie-save': function () {
+    var name = ((XA.$('#fanqieBookName') || {}).value || '').trim();
+    if (!name) { XA.toast('请输入小说名称'); return; }
+    XA.fanqieBooks.unshift({ title: name, author: '番茄用户收藏', tags: '#我的书架', coverClass: 'book-c1', coverWord: name, icon: 'play', chapters: [
+      { title: '第 1 章 · 开始阅读', text: '这是一段用于听书演示的原创示例文字。夜色温柔，脚步放慢，故事在耳边慢慢展开。' }
+    ] });
+    XA.fanqieBooks = XA.fanqieBooks.slice(0, 12);
+    XA.bookTab = 'favorites';
+    XA.saveFanqieBooks(); XA.renderFanqieBooks(); XA.closeModal();
+    XA.toast('小说已加入我的书架');
+  },
+  'community-search': function () { XA.toast('社区搜索：夜路、路灯、AR 眼镜'); },
+  topic: function () { XA.toast('话题已展开 · 夜路故事征集'); },
+  'story-more': function () {
+    XA.openSheet('<h3>故事操作</h3><div class="sheet-sub">社区内容需要审核与举报，保护分享者隐私</div>' +
+      '<button class="option-row" data-action="story-hide">' + ic('close') + '<span><b>不感兴趣</b><small>减少此类内容推荐</small></span></button>' +
+      '<button class="option-row" data-action="story-report">' + ic('warning') + '<span><b>举报内容</b><small>提交后由社区审核处理</small></span></button>' +
+      '<button class="option-row" data-action="story-copy">' + ic('share') + '<span><b>复制分享链接</b><small>不包含具体住址与实时位置</small></span></button>');
+  },
+  'story-hide': function () { XA.closeModal(); XA.toast('已减少此类内容推荐'); },
+  'story-report': function () { XA.closeModal(); XA.toast('举报已提交 · 感谢你守护社区'); },
+  'story-copy': function () { XA.closeModal(); XA.toast('分享链接已复制（演示）'); },
+  publish: function () {
+    XA.openSheet('<h3>发布夜行故事</h3><div class="sheet-sub">默认模糊具体住址与时间，保护分享者</div>' +
+      '<textarea class="sheet-input" id="storyInput" placeholder="写下你的夜路故事…"></textarea>' +
+      '<div class="sheet-chips"><button class="chip active" data-pub="anon">匿名分享</button><button class="chip" data-pub="local">仅同城可见</button></div>' +
+      '<button class="primary-btn" data-action="post-story">发布故事</button>');
+    XA.$$('[data-pub]').forEach(function (el) {
+      el.addEventListener('click', function () { el.classList.toggle('active'); });
+    });
+  },
+  'post-story': function () {
+    var val = (XA.$('#storyInput') || {}).value || '';
+    if (!val.trim()) { XA.toast('请先写下你的故事'); return; }
+    var feed = XA.$('#storyFeed');
+    var article = document.createElement('article');
+    article.className = 'story-card';
+    article.dataset.cat = 'local';
+    article.innerHTML = '<header><span class="avatar green">我</span><span><b>' +
+      (XA.$('[data-pub="anon"]').classList.contains('active') ? '匿名用户' : '安星用户') +
+      '</b><small>刚刚 · 武汉藏龙岛</small></span><span class="real-tag">真实经历</span></header><p></p>' +
+      '<footer><span>栗庙路 · 刚刚</span><span class="story-actions"><button class="like" data-action="like"><span class="like-ico">' +
+      ic('heart') + '</span><b>0</b></button><button>' + ic('comment') + '<b>0</b></button><button>' + ic('share') + '分享</button></span></footer>';
+    article.querySelector('p').textContent = val;
+    feed.insertBefore(article, feed.firstChild);
+    XA.closeModal();
+    XA.toast('故事已发布 · 已进入审核队列');
+  },
+  like: function (el) {
+    el.classList.toggle('liked');
+    var b = el.querySelector('b');
+    if (b) b.textContent = el.classList.contains('liked') ? (parseInt(b.textContent, 10) + 1) : (parseInt(b.textContent, 10) - 1);
+  },
+  'ar-settings': function () {
+    XA.openSheet('<h3>眼镜设置</h3><div class="sheet-sub">安星 AR · XA-0281</div>' +
+      '<div class="option-row">' + ic('settings') + '<span><b>镜片亮度</b><small>自动 · 根据环境光调节</small></span></div>' +
+      '<div class="option-row">' + ic('lock') + '<span><b>设备配对</b><small>本地加密 · 断开后可删除记录</small></span></div>' +
+      '<button class="primary-btn" data-action="close-settings">完成</button>');
+  },
+  'close-settings': function () { XA.closeModal(); },
+  'ar-full': function () { XA.openSheet('<h3>实时镜片画面</h3><div class="sheet-sub">1080P · 眼镜端实时同步</div>' +
+    '<img src="assets/ar-preview.jpg" alt="镜片预览" style="width:100%;border-radius:14px;display:block">' +
+    '<p class="sheet-note">前方 30 m 右转进入栗庙路 · 目的地藏龙东街地铁站 320 m · 安全分 92 · 路灯 86%</p>'); },
+  'find-glasses': function () { XA.toast('已向眼镜发送查找信号 · 镜腿提示音与闪烁已开启'); },
+  settings: function () { XA.go('settings'); },
+  'settings-language': function () { XA.actions.language(); },
+  'privacy-settings': function () {
+    var p = XA.privacy || {};
+    var row = function (key, icon, titleKey, descKey) {
+      var on = !!p[key];
+      return '<button class="setting-line privacy-row" data-privacy="' + key + '" aria-pressed="' + on + '">' +
+        '<span>' + ic(icon) + '</span><span class="privacy-copy"><b data-i18n="' + titleKey + '">' + XA.t(titleKey) + '</b>' +
+        '<small data-i18n="' + descKey + '">' + XA.t(descKey) + '</small></span>' +
+        '<span class="toggle' + (on ? ' on' : '') + '"><i></i></span></button>';
+    };
+    XA.openSheet('<h3 data-i18n="privacyManage">隐私与权限</h3><div class="sheet-sub" data-i18n="privacyManageSub">主页访问、购买记录与定位权限</div>' +
+      row('allowHomepage', 'users', 'allowHomepage', 'allowHomepageDesc') +
+      row('hidePurchases', 'lock', 'hidePurchases', 'hidePurchasesDesc') +
+      row('location', 'pin', 'locationPermission', 'locationPermissionDesc') +
+      row('analytics', 'shield', 'analytics', 'analyticsDesc') +
+      '<p class="sheet-note">所有开关仅保存在本机，可随时更改。关闭位置权限后，导航需手动输入起点。</p>');
+  },
+  /* ---------- 真实地图服务：Key 配置与实时定位 ---------- */
+  'geo-key': function () {
+    var builtin = XA.Geo ? XA.Geo.isBuiltin() : true;
+    XA.openSheet('<h3>地图服务状态</h3>' +
+      '<div class="sheet-sub">已内置高德官方 Web 服务，打开 APP 即自动生效，无需任何设置。</div>' +
+      '<div class="option-row">' + ic('check') + '<span><b>' + (builtin ? '已启用内置服务' : '正在使用自定义 Key') +
+        '</b><small>全中国真实 POI · 米级精确坐标 · 真实步行路线</small></span></div>' +
+      '<div class="option-row">' + ic('pin') + '<span><b>服务范围</b><small>地铁站 / 店铺 / 小区 / 街道 / 旅游景点等任意可搜索地点</small></span></div>' +
+      '<div class="option-row">' + ic('navigation') + '<span><b>定位方式</b><small>设备 GPS / 北斗 / 网络辅助定位（需浏览器授权）</small></span></div>' +
+      (builtin ? '' : '<button class="ghost-btn" data-action="geo-key-clear" style="margin-top:8px">恢复内置服务</button>') +
+      '<p class="sheet-note">服务由高德开放平台提供，坐标已按国家标准完成 GCJ02 → WGS84 纠偏。所有查询直接从您的设备发出。</p>');
+  },
+  'geo-key-clear': function () {
+    if (XA.Geo) XA.Geo.clearOverride();
+    XA.closeModal();
+    XA.toast('已恢复内置地图服务');
+    if (XA.refreshGeoState) XA.refreshGeoState();
+  },
+  'geo-locate': function () {
+    XA.closeModal();
+    if (!navigator.geolocation) { XA.toast('本设备不支持定位', 'warn'); return; }
+    XA.toast('正在通过 GPS / 北斗获取实时位置…');
+    navigator.geolocation.getCurrentPosition(function (p) {
+      var lat = p.coords.latitude, lng = p.coords.longitude, acc = p.coords.accuracy;
+      /* 浏览器在国内通常返回 WGS84；统一交给定位发布函数处理 */
+      if (XA.requestLocation) XA.requestLocation(function () {});
+      var msg = '定位成功 · 精度 ±' + Math.round(acc) + ' m';
+      if (XA.Geo && XA.Geo.hasKey()) {
+        XA.Geo.regeo(lat, lng).then(function (r) {
+          XA.openSheet('<h3>我的实时位置</h3><div class="sheet-sub">GPS / 北斗 · 精度 ±' + Math.round(acc) + ' m</div>' +
+            '<div class="option-row">' + ic('pin') + '<span><b>' + (r.formatted || '当前位置') + '</b><small>' + lat.toFixed(6) + ', ' + lng.toFixed(6) + '（WGS84）</small></span></div>' +
+            '<div class="option-row">' + ic('navigation') + '<span><b>定位来源</b><small>设备 GNSS（含北斗）/ 网络辅助定位</small></span></div>' +
+            '<p class="sheet-note">位置信息仅保存在本机，用于搜索中心与紧急求助时的位置共享。</p>');
+        }).catch(function () { XA.toast(msg); });
+      } else {
+        XA.toast(msg + ' · 配置 Key 后可显示真实街道地址');
+      }
+    }, function (e) {
+      var m = e && e.code === 1 ? '定位权限被拒绝 · 请在浏览器/系统设置中允许'
+            : e && e.code === 2 ? '暂时无法获取位置 · 请到室外或开启定位服务'
+            : '定位超时 · 请重试';
+      XA.toast(m, 'warn');
+    }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });
+  },
+
+  feedback: function () {
+    XA.openSheet('<h3 data-i18n="feedbackTitle">问题反馈</h3><div class="sheet-sub" data-i18n="feedbackSub">请告诉我们遇到的问题</div>' +
+      '<div class="sheet-chips"><button class="chip active" data-feedback-type="功能异常">功能异常</button>' +
+      '<button class="chip" data-feedback-type="体验建议">体验建议</button><button class="chip" data-feedback-type="账号与隐私">账号与隐私</button></div>' +
+      '<textarea class="sheet-input" id="feedbackInput" placeholder="' + XA.t('feedbackPlaceholder') + '" data-i18n-placeholder="feedbackPlaceholder"></textarea>' +
+      '<button class="option-row" data-action="feedback-service">' + ic('phone') + '<span><b data-i18n="contactService">联系在线客服</b><small data-i18n="serviceSub">工作日 9:00–22:00 · 演示会话</small></span></button>' +
+      '<button class="primary-btn" data-action="submit-feedback" data-i18n="submitFeedback">提交反馈</button>');
+    XA.$$('[data-feedback-type]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        XA.$$('[data-feedback-type]').forEach(function (b) { b.classList.remove('active'); });
+        el.classList.add('active');
+      });
+    });
+  },
+  'submit-feedback': function () {
+    var val = ((XA.$('#feedbackInput') || {}).value || '').trim();
+    if (!val) { XA.toast(XA.lang === 'en' ? 'Please describe the issue' : '请先描述遇到的问题'); return; }
+    XA.closeModal(); XA.toast(XA.t('feedbackThanks'));
+  },
+  'feedback-service': function () {
+    XA.openSheet('<h3 data-i18n="serviceTitle">在线客服</h3><div class="sheet-sub" data-i18n="serviceSub">工作日 9:00–22:00 · 演示会话</div>' +
+      '<div class="service-chat" id="serviceChat"><p class="service-msg">安星：你好，我是安星客服。请描述你遇到的问题，我会尽力帮你。</p></div>' +
+      '<div class="service-input-row"><input class="login-input" id="serviceInput" placeholder="' + XA.t('servicePlaceholder') + '" data-i18n-placeholder="servicePlaceholder"><button class="primary-btn" data-action="service-send" data-i18n="sendMessage">发送</button></div>');
+    setTimeout(function () { var i = XA.$('#serviceInput'); if (i) i.focus(); }, 260);
+  },
+  'service-send': function () {
+    var input = XA.$('#serviceInput'), chat = XA.$('#serviceChat');
+    if (!input || !chat) return;
+    var val = input.value.trim();
+    if (!val) return;
+    var me = document.createElement('p');
+    me.className = 'service-msg me'; me.textContent = '我：' + val;
+    chat.appendChild(me); input.value = ''; chat.scrollTop = chat.scrollHeight;
+    setTimeout(function () {
+      var reply = document.createElement('p');
+      reply.className = 'service-msg';
+      reply.textContent = XA.lang === 'en' ? 'Anxing: Thanks for reporting. We have recorded this demo conversation.' : '安星：已收到，我们会记录这段演示会话并尽快跟进。';
+      chat.appendChild(reply); chat.scrollTop = chat.scrollHeight;
+    }, 600);
+  },
+  'logout-confirm': function () {
+    XA.closeModal();
+    setTimeout(function () {
+      XA.openSheet('<h3 data-i18n="logoutConfirmTitle">是否退出登录？</h3><div class="sheet-sub" data-i18n="logoutConfirmSub">退出后将无法同步安全路线与守护记录</div>' +
+        '<div class="option-row">' + ic('users') + '<span><b>' + (XA.account && XA.account.loggedIn ? XA.account.nickname : '游客') + '</b><small>' +
+        (XA.account && XA.account.loggedIn ? XA.account.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') : '当前未登录') + '</small></span></div>' +
+        '<button class="login-skip" data-close="1" data-i18n="keepLogin">保持登录</button>' +
+        '<button class="logout-confirm-btn" data-action="logout-account" data-i18n="confirmLogout">确认退出</button>');
+    }, 180);
+  }
+};
+Object.assign(XA.actions, _earlyActions);   // 避免整体赋值覆盖早期动作（人脸/密码验证）
+
+XA.menuSheets = {
+  contacts: ['紧急联系人', '妈妈 / 阿哲 / 物业管家 · 已通知 3 位'],
+  routes: ['我的安全路线', '栗庙路主线 92 分 · 藏龙大道备选 78 分'],
+  history: ['守护记录', '已完成 18 段安全行程 · 1 次误报取消'],
+  privacy: ['隐私与权限', '位置仅使用期间 · 麦克风端侧处理 · 可随时撤回'],
+  device: ['AR 眼镜设备', 'XA-0281 已连接 · 电量 82% · 配对信息本地加密'],
+  about: ['关于安星', '安星 · 夜行安全系统 V3.0 · 八大原则增强版']
+};
+
+XA.bindPageEvents = function () {
+  /* 取消报警统一走人脸/密码验证，不再提供长按直接取消的旁路 */
+
+  var homeNav = XA.$('.home-sheet [data-action="start-nav"]');
+  if (homeNav) XA.hold(homeNav, 1200, function () { XA.actions['share-trip'](); });
+  XA.$$('.route-card').forEach(function (el) {
+    XA.hold(el, 1000, function () {
+      var fav = el.classList.toggle('favorite');
+      XA.toast(fav ? '已收藏为我的安全路线' : '已取消收藏');
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    var lang = e.target.closest('[data-lang]');
+    if (lang) {
+      XA.setLanguage(lang.dataset.lang);
+      XA.closeModal();
+      XA.toast(XA.lang === 'en' ? 'Language set to English' : '已切换为简体中文');
+      return;
+    }
+    var speed = e.target.closest('[data-book-speed]');
+    if (speed) {
+      XA.bookSpeed = Number(speed.dataset.bookSpeed) || 1;
+      XA.$$('[data-book-speed]').forEach(function (el) { el.classList.toggle('active', el === speed); });
+      if (XA.bookPlaying) XA.speakCurrentChapter();
+      XA.toast('听书倍速 ' + XA.bookSpeed + 'x');
+      return;
+    }
+    var privacy = e.target.closest('[data-privacy]');
+    if (privacy) {
+      var key = privacy.dataset.privacy;
+      XA.privacy[key] = !XA.privacy[key];
+      var on = !!XA.privacy[key];
+      privacy.setAttribute('aria-pressed', String(on));
+      var tg = privacy.querySelector('.toggle');
+      if (tg) tg.classList.toggle('on', on);
+      if (XA.savePrivacy) XA.savePrivacy();
+      XA.toast(XA.t('privacySaved') + ' · ' + (on ? XA.t('enabled') : XA.t('disabled')));
+      return;
+    }
+    var menu = e.target.closest('[data-menu]');
+    if (menu) {
+      var m = XA.menuSheets[menu.dataset.menu];
+      if (m) XA.openSheet('<h3>' + m[0] + '</h3><div class="sheet-sub">' + m[1] + '</div>' +
+        '<div class="option-row">' + ic('check') + '<span><b>信息已同步</b><small>演示数据 · 仅用于设计评审</small></span></div>');
+      return;
+    }
+    var ctab = e.target.closest('[data-ctab]');
+    if (ctab) {
+      XA.$$('[data-ctab]').forEach(function (el) { el.classList.toggle('active', el === ctab); });
+      var cat = ctab.dataset.ctab;
+      XA.$$('.story-card').forEach(function (el) { el.style.display = (cat === 'all' || el.dataset.cat === cat) ? '' : 'none'; });
+      return;
+    }
+    var track = e.target.closest('[data-track]');
+    if (track) {
+      var idx = XA.tracks.findIndex(function (t) { return t.title === track.dataset.track; });
+      XA.trackIndex = idx === -1 ? 0 : idx;
+      XA.progressSec = 0;
+      XA.updatePlayer();
+      XA.toast('已载入《' + XA.tracks[XA.trackIndex].title + '》');
+      return;
+    }
+    var mode = e.target.closest('[data-mode]');
+    if (mode) {
+      XA.$$('.mode-card').forEach(function (el) { el.classList.toggle('active', el === mode); });
+      XA.toast('眼镜端已切换到' + mode.dataset.mode);
+      return;
+    }
+    var sense = e.target.closest('[data-sense]');
+    if (sense) {
+      sense.classList.toggle('on');
+      var n = XA.$$('.sense.on').length;
+      var t = XA.$('#armedText');
+      if (t) t.textContent = n === 3 ? '自动报警已就绪' : n + ' 项感知开启';
+      XA.toast(sense.dataset.sense + (sense.classList.contains('on') ? '已开启' : '已关闭'));
+      return;
+    }
+  });
+  ['volumeSlider', 'arVolume'].forEach(function (id) {
+    var el = XA.$('#' + id);
+    if (el) el.addEventListener('input', function () {
+      el.style.background = 'linear-gradient(90deg,var(--amber) ' + el.value + '%,rgba(255,255,255,.12) ' + el.value + '%)';
+      if (XA.audio) XA.audio.volume = Math.max(0, Math.min(1, Number(el.value) / 100));
+    });
+  });
+  XA.$$('input[type=range]').forEach(function (el) {
+    el.style.background = 'linear-gradient(90deg,var(--amber) ' + el.value + '%,rgba(255,255,255,.12) ' + el.value + '%)';
+  });
+};
+
+/* =========================================================
+   社区改版：夜路搭子预约 / 安心好物商城 / VIP 订阅
+   全部为概念演示，不产生真实订单、扣费或身份校验
+   ========================================================= */
+(function () {
+  function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch (e) { return def; } }
+  function save(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  XA.buddy = load('xa_buddy', { verified: false, name: '', reservations: [], freeLeft: 3 });
+  if (typeof XA.buddy.freeLeft !== 'number') XA.buddy.freeLeft = 3;
+  if (!Array.isArray(XA.buddy.reservations)) XA.buddy.reservations = [];
+  XA.vip = load('xa_vip', { plan: null, since: 0 });
+  XA.shopCart = [];
+
+  var PLANS = { month: ['月包', '¥12', '适合临时夜行'], quarter: ['季包', '¥30', '省 ¥6 · 最受欢迎'], year: ['年包', '¥98', '省 ¥46 · 长期守护'] };
+  var SKUS = [
+    { id: 'ar', name: '安星 AR 眼镜 XA-0281', desc: '3D 导航 · 夜视增强 · 开放式音频', price: '¥1,299', icon: 'glasses', tag: '品牌旗舰', grad: 'linear-gradient(135deg,#1c2b4a,#0e1626)', specs: ['曜石黑', '月光银', '星蓝限定'] },
+    { id: 'alarm', name: '随行声光报警器', desc: '120dB · 一键鸣响 · 可挂背包', price: '¥199', icon: 'siren', tag: '热销', grad: 'linear-gradient(135deg,#4a1c22,#26090d)', specs: ['标准版', '挂绳套装'] },
+    { id: 'light', name: '夜行强光手电', desc: 'IPX7 防水 · 爆闪求救模式', price: '¥129', icon: 'moon', tag: '新品', grad: 'linear-gradient(135deg,#463a17,#221b09)', specs: ['标准版', '礼盒版'] },
+    { id: 'spray', name: '个人防护喷雾', desc: '合规便携 · 含防误触锁扣', price: '¥89', icon: 'shield', tag: '防护', grad: 'linear-gradient(135deg,#173a2e,#0a1f18)', specs: ['单支装', '双支装'] }
+  ];
+  var BUDDY_POOL = [
+    { name: '林晚', time: '21:30', roads: ['栗庙路', '藏龙大道', '光谷大道'], dest: '藏龙东街地铁站', note: '夜行 3 年 · 已实名' },
+    { name: '阿哲', time: '22:00', roads: ['藏龙大道', '夜宵街'], dest: '藏龙东街地铁站', note: 'AR 眼镜体验官 · 已实名' },
+    { name: '小满', time: '21:10', roads: ['藏龙大道', '光谷大道'], dest: '益丰大药房', note: '同路段通勤 · 已实名' },
+    { name: '陈叔', time: '22:20', roads: ['藏龙大道', '栗庙路'], dest: '藏龙岛警务站', note: '物业夜巡 · 已实名' },
+    { name: 'Yuki', time: '21:45', roads: ['夜宵街', '藏龙大道'], dest: '藏龙岛夜市', note: '下班同行 · 已实名' }
+  ];
+
+  function isVip() { return !!XA.vip.plan; }
+  function quotaText() { return isVip() ? 'VIP 已开通 · 不限次' : '免费体验 ' + XA.buddy.freeLeft + ' 次'; }
+  function tokens(s) {
+    return String(s || '').split(/[,，、;；\s·/]+/).filter(function (x) { return x.length >= 2; });
+  }
+  function matchFor(res) {
+    var rs = tokens(res.roads);
+    return BUDDY_POOL.map(function (b) {
+      var shared = [];
+      rs.forEach(function (r) {
+        b.roads.forEach(function (br) {
+          if ((r.indexOf(br) >= 0 || br.indexOf(r) >= 0) && shared.indexOf(br) < 0) shared.push(br);
+        });
+      });
+      return { name: b.name, time: b.time, dest: b.dest, note: b.note, shared: shared, score: Math.min(96, 58 + shared.length * 13) };
+    }).filter(function (m) { return m.shared.length > 0; })
+      .sort(function (a, b) { return b.score - a.score; }).slice(0, 3);
+  }
+  function matchSheet(res) {
+    var list = matchFor(res);
+    var html = '<h3>AI 同行匹配</h3><div class="sheet-sub">不需要起点终点完全一致 · 只匹配与你途经同一段路线的人</div>';
+    html += '<div class="match-query">' + ic('route') + '<span><b>我的预约</b><small>' + esc(res.roads) + ' → ' + esc(res.dest) + ' · ' + esc(res.time) + '</small></span></div>';
+    if (!list.length) {
+      html += '<div class="poi-empty">暂未匹配到同路段的人，可换个途经路段或稍后再看。</div>';
+    } else {
+      html += list.map(function (m) {
+        return '<div class="match-card"><span class="match-avatar">' + esc(m.name.slice(0, 1)) + '</span>' +
+          '<span><b>' + esc(m.name) + '</b><small>' + esc(m.note) + ' · ' + esc(m.time) + ' 出发</small>' +
+          '<em>同行 ' + esc(m.shared.join(' / ')) + '</em></span><span class="match-score">' + m.score + '%</span></div>';
+      }).join('');
+      html += '<div class="sheet-sub">匹配度为同路段重合度估算，可在预约列表中再次查看。</div>';
+    }
+    html += '<button class="primary-btn" data-action="buddy-publish">再发布一条预约</button>';
+    XA.openSheet(html);
+  }
+
+  XA.renderVip = function () {
+    var s = XA.$('#vipStatus'), c = XA.$('#vipCard');
+    if (s) s.textContent = isVip() ? '专属权益已生效 · 点击查看' : '点击查看专属权益';
+    if (c) c.classList.toggle('active', isVip());
+  };
+  XA.renderCommunity = function () {
+    var v = XA.$('#cmVerify');
+    if (v) {
+      v.innerHTML = XA.buddy.verified
+        ? '<div class="cm-verified">' + ic('check') + '<span><b>已实名认证' + (XA.buddy.name ? ' · ' + esc(XA.buddy.name) : '') + '</b><small>仅用于夜路搭子预约，信息保存在本机（概念演示）</small></span></div>'
+        : '<div class="cm-verify">' + ic('shield') + '<span><b>发布预约前需实名认证</b><small>为了同行安全，先完成认证才能发布夜路搭子预约</small></span><button data-action="buddy-verify">去认证</button></div>';
+    }
+    var q = XA.$('#cmQuota'); if (q) q.textContent = quotaText();
+    var r = XA.$('#cmReservations');
+    if (r) {
+      r.innerHTML = XA.buddy.reservations.length
+        ? XA.buddy.reservations.map(function (x) {
+          return '<div class="cm-res"><div class="cm-res-top"><b>' + esc(x.time) + ' 出发</b><span>待出发</span></div>' +
+            '<div class="cm-res-road">' + ic('route') + '<span>' + esc(x.roads) + '</span>' + ic('chevron') + '<b>' + esc(x.dest) + '</b></div>' +
+            '<button data-action="buddy-match" data-id="' + x.id + '">查看 AI 同行匹配 ' + ic('chevron') + '</button></div>';
+        }).join('')
+        : '<div class="cm-empty">还没有预约 · 发布一条提前预约，AI 会帮你找到同路段的人</div>';
+    }
+    var g = XA.$('#cmGoods');
+    if (g) {
+      g.innerHTML = SKUS.map(function (s) {
+        return '<button class="cm-good" data-action="shop-buy" data-sku="' + s.id + '"><span class="cm-good-tag">' + s.tag + '</span>' +
+          '<span class="cm-good-ico">' + ic(s.icon) + '</span><b>' + s.name + '</b><small>' + s.desc + '</small>' +
+          '<span class="cm-good-price">' + s.price + '<em>单独付费</em></span></button>';
+      }).join('');
+    }
+    XA.renderVip();
+  };
+
+  XA.actions['buddy-verify'] = function () {
+    XA.openSheet('<h3>实名认证</h3><div class="sheet-sub">概念演示 · 信息仅保存在本机，不会上传</div>' +
+      '<div class="form-row"><label>真实姓名</label><input id="byName" placeholder="请输入姓名"></div>' +
+      '<div class="form-row"><label>身份证后 4 位</label><input id="byId" maxlength="4" inputmode="numeric" placeholder="如 1234"></div>' +
+      '<div class="option-row">' + ic('lock') + '<span><b>用途说明</b><small>仅用于夜路搭子预约的同行身份核验</small></span></div>' +
+      '<button class="primary-btn" data-action="buddy-verify-submit">完成认证</button>');
+  };
+  XA.actions['buddy-verify-submit'] = function () {
+    var name = (XA.$('#byName') || {}).value || '', id = (XA.$('#byId') || {}).value || '';
+    if (name.trim().length < 2 || !/^\d{4}$/.test(id.trim())) { XA.toast('请填写姓名与身份证后 4 位'); return; }
+    XA.buddy.verified = true; XA.buddy.name = name.trim().slice(0, 1) + '**';
+    save('xa_buddy', XA.buddy); XA.closeModal(); XA.renderCommunity();
+    XA.toast('实名认证已完成 · 可以发布预约了');
+  };
+  XA.actions['buddy-publish'] = function () {
+    if (!XA.buddy.verified) { XA.toast('请先完成实名认证'); XA.actions['buddy-verify'](); return; }
+    if (!isVip() && XA.buddy.freeLeft <= 0) { XA.toast('免费次数已用完 · 开通 VIP 继续使用'); XA.actions['vip-open'](); return; }
+    var now = new Date(Date.now() + 3600000);
+    var def = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + 'T' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    XA.openSheet('<h3>发布夜路同行预约</h3><div class="sheet-sub">提前预约，不是即时匹配 · AI 会匹配同段同行路线</div>' +
+      '<div class="form-row"><label>出发时间</label><input id="byTime" type="datetime-local" value="' + def + '"></div>' +
+      '<div class="form-row"><label>出发 / 途经路段</label><input id="byRoads" placeholder="如 栗庙路、藏龙大道、光谷大道"></div>' +
+      '<div class="form-row"><label>终点</label><input id="byDest" placeholder="如 藏龙东街地铁站"></div>' +
+      '<div class="option-row">' + ic('users') + '<span><b>匹配规则</b><small>起点终点不必完全一致，只匹配同一段同行路线</small></span></div>' +
+      '<button class="primary-btn" data-action="buddy-publish-submit">发布并查看 AI 匹配</button>');
+  };
+  XA.actions['buddy-publish-submit'] = function () {
+    var t = (XA.$('#byTime') || {}).value || '', roads = ((XA.$('#byRoads') || {}).value || '').trim(), dest = ((XA.$('#byDest') || {}).value || '').trim();
+    if (!t || !roads || !dest) { XA.toast('请填写出发时间、途经路段和终点'); return; }
+    var res = { id: Date.now(), time: t.replace('T', ' ').slice(5), roads: roads, dest: dest };
+    XA.buddy.reservations.unshift(res);
+    if (!isVip()) XA.buddy.freeLeft = Math.max(0, XA.buddy.freeLeft - 1);
+    save('xa_buddy', XA.buddy);
+    XA.renderCommunity();
+    XA.toast('预约已发布 · ' + quotaText());
+    matchSheet(res);
+  };
+  XA.actions['buddy-match'] = function (el) {
+    var res = XA.buddy.reservations.filter(function (x) { return String(x.id) === String(el.dataset.id); })[0];
+    if (res) matchSheet(res);
+  };
+  XA.actions['go-shop'] = function () { XA.go('shop'); };
+  XA.actions['community-profile'] = function () { XA.go('buddyProfile'); };
+  XA.actions['go-community'] = function () { XA.go('community'); };
+  XA.actions['shop-buy'] = function (el) {
+    var s = SKUS.filter(function (x) { return x.id === el.dataset.sku; })[0]; if (!s) return;
+    XA.openSheet(
+      '<div class="shop-hero" style="background:' + s.grad + '">' +
+        '<span class="shop-hero-ico">' + ic(s.icon) + '</span>' +
+        '<span class="shop-hero-badge">' + s.tag + '</span>' +
+      '</div>' +
+      '<h3>' + s.name + '</h3><div class="sheet-sub">' + s.desc + '</div>' +
+      '<div class="shop-price">' + s.price + '<em>单独付费 · 概念演示</em></div>' +
+      '<button class="shop-video" data-action="shop-video">' +
+        '<img src="assets/video-night.jpg" alt="商品演示视频">' +
+        '<span class="shop-video-mask"></span>' +
+        '<span class="shop-video-play">▶</span>' +
+        '<small>商品演示视频 · 00:32</small>' +
+      '</button>' +
+      '<div class="setting-line"><span><b>选择规格</b><small>不同规格价格一致（演示）</small></span></div>' +
+      '<div class="seg" id="shopSpecs">' + s.specs.map(function (sp, i) {
+        return '<button data-spec="' + i + '" class="' + (i === 0 ? 'on' : '') + '">' + sp + '</button>';
+      }).join('') + '</div>' +
+      '<div class="shop-services">' + ic('check') + '正品保障' + ic('check') + '七天无理由' + ic('check') + '顺丰包邮' + ic('check') + '一年质保</div>' +
+      '<div class="shop-buy-row">' +
+        '<button class="ghost-btn" data-action="shop-confirm" data-sku="' + s.id + '">加入购物车</button>' +
+        '<button class="primary-btn" data-action="shop-order" data-sku="' + s.id + '">立即购买</button>' +
+      '</div>');
+  };
+  XA.actions['shop-video'] = function () { XA.toast('演示视频 · 概念原型暂无真实播放'); };
+  XA.actions['shop-order'] = function (el) {
+    var s = SKUS.filter(function (x) { return x.id === el.dataset.sku; })[0]; if (!s) return;
+    XA.closeModal();
+    XA.toast(s.name + ' · 演示原型，不产生真实订单');
+  };
+  XA.actions['shop-confirm'] = function (el) {
+    var s = SKUS.filter(function (x) { return x.id === el.dataset.sku; })[0]; if (!s) return;
+    XA.shopCart.push(s.id); XA.closeModal(); XA.toast(s.name + ' 已加入购物车 · 演示不产生订单');
+  };
+  XA.actions['vip-open'] = function () {
+    var html = '<h3>安星 VIP</h3><div class="sheet-sub">解锁找搭子等增值功能 · 基础伴行功能永久免费</div>';
+    Object.keys(PLANS).forEach(function (k) {
+      var p = PLANS[k];
+      html += '<button class="vip-plan' + (XA.vip.plan === k ? ' active' : '') + '" data-action="vip-subscribe" data-plan="' + k + '">' +
+        '<span><b>' + p[0] + '</b><small>' + p[2] + '</small></span><em>' + p[1] + '</em></button>';
+    });
+    html += '<div class="vip-info-foot">' +
+      '<div class="vip-info-block">' + ic('check') + '<span><b>免费功能说明</b><small>导航、听歌、听书、伴行与 SOS 一键求助永久免费；找搭子含 3 次免费体验，商城商品单独付费。</small></span></div>' +
+      '<div class="vip-info-block">' + ic('shield') + '<span><b>订阅 VIP 说明</b><small>订阅后可不限次发布同行预约，并解锁增值守护权益；月 / 季 / 年包三档可选，不影响基础功能。</small></span></div>' +
+      '<p class="sheet-sub">概念演示订阅，不会产生真实订单或扣费。</p></div>';
+    XA.openSheet(html);
+  };
+  XA.actions['vip-subscribe'] = function (el) {
+    var k = el.dataset.plan; if (!PLANS[k]) return;
+    XA.vip = { plan: k, since: Date.now() }; save('xa_vip', XA.vip);
+    XA.closeModal(); XA.renderVip(); XA.renderCommunity();
+    XA.toast(PLANS[k][0] + '已开通 · 找搭子不限次');
+  };
+
+  /* 定位点击无效修复：打开位置详情时主动取实时坐标，并支持重新定位 */
+  function locationDetailHtml() {
+    var p = XA.position || { lat: 30.3942219, lng: 114.413263, real: false, acc: 0 };
+    var detail = p.real
+      ? '实时定位 ' + p.lat.toFixed(5) + ', ' + p.lng.toFixed(5) + ' · 精度 ±' + Math.round(p.acc || 8) + 'm'
+      : '设备定位未开启 · 当前为概念演示位置';
+    return '<h3>当前位置</h3><div class="sheet-sub">报警时会把实时位置同步给紧急联系人</div>' +
+      '<div class="option-row">' + ic('pin') + '<span><b>' + detail + '</b><small>更新时间 ' + new Date().toLocaleTimeString('zh-CN') + '</small></span></div>' +
+      '<div class="option-row">' + ic('users') + '<span><b>已同步给 3 位亲友</b><small>妈妈 / 阿哲 / 物业管家</small></span></div>' +
+      '<button class="primary-btn" data-action="refresh-location">重新获取实时位置</button>';
+  }
+  XA.actions['location-detail'] = function () { XA.openSheet(locationDetailHtml()); };
+  XA.actions['refresh-location'] = function () {
+    XA.toast('正在重新获取实时位置…');
+    var done = function (p) {
+      XA.openSheet(locationDetailHtml());
+      XA.toast(p && p.real ? '实时位置已更新' : '定位未开启 · 已显示概念演示位置');
+    };
+    if (XA.requestLocation) XA.requestLocation(done);
+    else setTimeout(function () { done(XA.position); }, 400);
+  };
+
+  /* 商品规格选择 */
+  document.addEventListener('click', function (e) {
+    var sp = e.target.closest('[data-spec]'); if (!sp) return;
+    var seg = sp.parentElement;
+    if (seg) XA.$$('[data-spec]', seg).forEach(function (b) { b.classList.toggle('on', b === sp); });
+  });
+})();
+
+/* =========================================================
+   我的页：紧急联系人增删管理（含设备绑定）/ 常用路线增删与一键导航
+   全部为概念演示，数据保存在本机 localStorage
+   ========================================================= */
+(function () {
+  function load(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch (e) { return def; } }
+  function save(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  XA.contacts = load('xa_contacts', [
+    { id: 1, name: '妈妈', tel: '138****6621', device: '手机短信 / 电话' },
+    { id: 2, name: '阿哲', tel: '137****0935', device: '安星手表' },
+    { id: 3, name: '物业管家', tel: '0571-88**', device: '固话' }
+  ]);
+  if (!Array.isArray(XA.contacts)) XA.contacts = [];
+  XA.myRoutes = load('xa_routes', [
+    { id: 1, name: '湖美 → 藏龙东街地铁站', dest: '藏龙东街地铁站', time: '18 分钟', score: 92 },
+    { id: 2, name: '湖美 → 栗庙路夜市', dest: '栗庙路夜市', time: '12 分钟', score: 90 }
+  ]);
+  if (!Array.isArray(XA.myRoutes)) XA.myRoutes = [];
+  XA.ctDevices = load('xa_ct_devices', { phone: true, watch: true, ar: false });
+
+  XA.renderProfileCounts = function () {
+    var c = XA.$('#contactsCount'); if (c) c.textContent = XA.contacts.length + ' 位';
+    var r = XA.$('#routesCount'); if (r) r.textContent = XA.myRoutes.length + ' 条';
+    var s = XA.$('#statContacts'); if (s) s.textContent = XA.contacts.length;
+  };
+
+  XA.actions['contacts-manage'] = function () {
+    var html = '<h3>紧急联系人</h3><div class="sheet-sub">SOS 触发时将同步实时位置并依次通知</div>';
+    html += XA.contacts.length
+      ? XA.contacts.map(function (c) {
+          return '<div class="ct-row"><span class="match-avatar">' + esc(c.name.slice(0, 1)) + '</span>' +
+            '<span class="ct-info"><b>' + esc(c.name) + '</b><small>' + esc(c.tel) + ' · ' + esc(c.device) + '</small></span>' +
+            '<button class="ct-del" data-action="contact-del" data-id="' + c.id + '" aria-label="删除">' + ic('close') + '</button></div>';
+        }).join('')
+      : '<div class="poi-empty">还没有紧急联系人 · 添加后 SOS 会第一时间通知 TA</div>';
+    var dv = XA.ctDevices;
+    html += '<div class="setting-line" style="margin-top:8px"><span><b>通知设备绑定</b><small>选择联系人接收求助的设备通道</small></span></div>' +
+      '<div class="seg">' +
+      '<button data-ctdev="phone" class="' + (dv.phone ? 'on' : '') + '">手机短信 / 电话</button>' +
+      '<button data-ctdev="watch" class="' + (dv.watch ? 'on' : '') + '">安星手表</button>' +
+      '<button data-ctdev="ar" class="' + (dv.ar ? 'on' : '') + '">AR 眼镜推送</button></div>' +
+      '<div class="form-row"><label>姓名</label><input id="ctName" maxlength="8" placeholder="如 妈妈"></div>' +
+      '<div class="form-row"><label>电话（可脱敏）</label><input id="ctTel" maxlength="16" placeholder="如 138****6621"></div>' +
+      '<button class="primary-btn" data-action="contact-add">' + ic('plus') + '添加联系人</button>';
+    XA.openSheet(html);
+  };
+  XA.actions['contact-del'] = function (el) {
+    XA.contacts = XA.contacts.filter(function (c) { return String(c.id) !== String(el.dataset.id); });
+    save('xa_contacts', XA.contacts);
+    XA.renderProfileCounts();
+    XA.actions['contacts-manage']();
+    XA.toast('联系人已删除 · 保存于本机');
+  };
+  XA.actions['contact-add'] = function () {
+    var name = ((XA.$('#ctName') || {}).value || '').trim();
+    var tel = ((XA.$('#ctTel') || {}).value || '').trim();
+    if (!name) { XA.toast('请填写联系人姓名'); return; }
+    XA.contacts.unshift({ id: Date.now(), name: name, tel: tel || '未填写', device: '手机短信 / 电话' });
+    save('xa_contacts', XA.contacts);
+    XA.renderProfileCounts();
+    XA.actions['contacts-manage']();
+    XA.toast('已添加 ' + name + ' · SOS 时将同步位置');
+  };
+
+  XA.actions['routes-manage'] = function () {
+    var html = '<h3>我的安全路线</h3><div class="sheet-sub">点右侧按钮一键导航 · 也可删除后重新添加</div>';
+    html += XA.myRoutes.length
+      ? XA.myRoutes.map(function (r) {
+          return '<div class="ct-row"><span class="rt-score">' + r.score + '</span>' +
+            '<span class="ct-info"><b>' + esc(r.name) + '</b><small>预计 ' + esc(r.time) + ' · 安全分 ' + r.score + '</small></span>' +
+            '<button class="rt-go" data-action="route-go" data-dest="' + esc(r.dest) + '" aria-label="一键导航">' + ic('navigation') + '</button>' +
+            '<button class="ct-del" data-action="route-del" data-id="' + r.id + '" aria-label="删除">' + ic('close') + '</button></div>';
+        }).join('')
+      : '<div class="poi-empty">还没有常用路线 · 添加终点即可一键导航</div>';
+    html += '<div class="form-row"><label>路线名称</label><input id="rtName" maxlength="12" placeholder="如 家 → 公司"></div>' +
+      '<div class="form-row"><label>终点（演示地点）</label><input id="rtDest" maxlength="12" placeholder="如 藏龙东街地铁站 / 栗庙路夜市"></div>' +
+      '<button class="primary-btn" data-action="route-add">' + ic('plus') + '添加常用路线</button>';
+    XA.openSheet(html);
+  };
+  XA.actions['route-del'] = function (el) {
+    XA.myRoutes = XA.myRoutes.filter(function (r) { return String(r.id) !== String(el.dataset.id); });
+    save('xa_routes', XA.myRoutes);
+    XA.renderProfileCounts();
+    XA.actions['routes-manage']();
+    XA.toast('已删除该路线');
+  };
+  XA.actions['route-add'] = function () {
+    var name = ((XA.$('#rtName') || {}).value || '').trim();
+    var dest = ((XA.$('#rtDest') || {}).value || '').trim();
+    if (!name || !dest) { XA.toast('请填写路线名称与终点'); return; }
+    XA.myRoutes.unshift({ id: Date.now(), name: name, dest: dest, time: '18 分钟', score: 88 });
+    save('xa_routes', XA.myRoutes);
+    XA.renderProfileCounts();
+    XA.actions['routes-manage']();
+    XA.toast('已添加「' + name + '」');
+  };
+  XA.actions['route-go'] = function (el) {
+    XA.closeModal();
+    XA.setDestination(el.dataset.dest);
+    XA.go('route');
+    XA.toast('已设定终点 ' + el.dataset.dest + ' · 请选择路线开始导航');
+  };
+
+  /* 设备绑定通道切换 */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ctdev]'); if (!b) return;
+    var k = b.dataset.ctdev;
+    XA.ctDevices[k] = !XA.ctDevices[k];
+    save('xa_ct_devices', XA.ctDevices);
+    b.classList.toggle('on', XA.ctDevices[k]);
+    XA.toast(({ phone: '手机短信 / 电话', watch: '安星手表', ar: 'AR 眼镜推送' })[k] + (XA.ctDevices[k] ? ' 已开启' : ' 已关闭'));
+  });
+})();
+
+if (!window.XA_DEFER_INIT) XA.init();
