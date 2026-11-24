@@ -1281,3 +1281,48 @@ html[data-scheme="light"] .nearby-main small{color:var(--muted)}
 .lv-sos:hover{border-color:rgba(255,91,82,.55)}
 html[data-scheme="light"] .lv-share{background:rgba(31,143,131,.07)}
 html[data-scheme="light"] .lv-sos{background:rgba(226,64,58,.06)}
+
+
+/* =========================================================
+   POI 详情 · 纯资料展示（不是按钮）
+   与可点击的 .option-row 明确区分：无卡片背景、无边框、无圆角、
+   无按压反馈、无指针手型；用细分隔线 + 标签/值两列排版，
+   呈现"这是信息，不是操作"，同时允许选中复制文本。
+   ========================================================= */
+.poi-facts{
+  margin:6px 0 0; padding:2px 0;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  background:none; cursor:default;
+}
+.poi-fact{
+  display:grid; grid-template-columns:52px minmax(0,1fr); gap:14px;
+  align-items:baseline; padding:11px 2px; margin:0;
+  background:none; border:0; border-radius:0; box-shadow:none;
+  cursor:default; user-select:text; -webkit-user-select:text;
+}
+.poi-fact + .poi-fact{border-top:1px solid var(--line)}
+.poi-fact dt{
+  margin:0; font-size:10px; font-weight:600; letter-spacing:.08em;
+  color:var(--dim); line-height:1.7; white-space:nowrap;
+}
+.poi-fact dd{
+  margin:0; min-width:0; font-size:12px; line-height:1.7;
+  color:var(--text); overflow-wrap:anywhere;
+}
+.poi-fact dd.poi-coord{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace;
+  font-size:11px; letter-spacing:.02em; color:var(--muted);
+}
+.poi-fact dd.poi-coord span{
+  margin-left:8px; font-family:inherit; font-size:9px; font-weight:700;
+  letter-spacing:.1em; color:var(--dim);
+}
+.poi-facts-note{
+  margin:10px 0 0; font-size:10px; line-height:1.7; color:var(--dim);
+}
+/* 明确取消任何继承自通用交互规则的按压/指针效果 */
+.poi-fact:active,.poi-facts:active{transform:none;filter:none}
+.poi-fact:hover,.poi-facts:hover{background:none;border-color:var(--line)}
+/* 浅色主题：变量自动适配，仅把分隔线略减弱 */
+html[data-scheme="light"] .poi-facts,
+html[data-scheme="light"] .poi-fact + .poi-fact{border-color:rgba(11,22,36,.13)}

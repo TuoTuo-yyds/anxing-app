@@ -242,9 +242,13 @@
     var p = state.results[i]; if (!p) return;
     var src = p.approx ? '真实地点 · 演示精度坐标' : '真实地点 · 精确坐标';
     XA.openSheet('<h3>' + esc(p.name) + '</h3><div class="sheet-sub">' + src + ' · 距你 ' + fmt(p.dist) + '</div>' +
-      '<div class="option-row">' + ic('pin') + '<span><b>地址</b><small>' + esc(p.address || '地图暂未提供详细地址') + '</small></span></div>' +
-      '<div class="option-row">' + ic('route') + '<span><b>类别</b><small>' + esc(p.category || '地点') + ' · 点击导航后选择安全路线</small></span></div>' +
-      '<div class="option-row">' + ic('navigation') + '<span><b>坐标</b><small>' + p.lat.toFixed(6) + ', ' + p.lng.toFixed(6) + '（WGS84）</small></span></div>' +
+      /* 纯资料展示：无卡片、无边框、无点击态，与下方操作按钮明确区分 */
+      '<dl class="poi-facts">' +
+        '<div class="poi-fact"><dt>地址</dt><dd>' + esc(p.address || '地图暂未提供详细地址') + '</dd></div>' +
+        '<div class="poi-fact"><dt>类别</dt><dd>' + esc(p.category || '地点') + '</dd></div>' +
+        '<div class="poi-fact"><dt>坐标</dt><dd class="poi-coord">' + p.lat.toFixed(6) + ', ' + p.lng.toFixed(6) + '<span>WGS84</span></dd></div>' +
+      '</dl>' +
+      '<p class="poi-facts-note">选择路线后可查看夜间安全评分与照明信息</p>' +
       '<button class="primary-btn" data-action="navigate-poi" data-poi="' + i + '">选择路线并导航</button>' +
       '<button class="ghost-btn" data-action="locate-poi" data-poi="' + i + '">在地图中定位</button>');
   }
