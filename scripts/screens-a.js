@@ -32,6 +32,14 @@ XA_SCREENS.home = `
     <span class="nearby-cta">看看 ↗</span>
   </button>
 
+  <!-- 位置共享状态：默认隐藏，确认共享后常驻可见，点「停止」立即结束。
+       兑现「随时可停止」的承诺（可见性 / 反馈 / 用户控制）。 -->
+  <div class="share-state is-hidden" id="shareState" role="status" aria-label="位置共享状态">
+    <span class="share-state-dot"></span>
+    <span class="share-state-copy"><b>位置共享中</b><small>3 位联系人可见 · 未报警</small></span>
+    <button class="share-state-stop" data-action="help-share-end">停止</button>
+  </div>
+
   <!-- 使用教程入口：静态元素，页面一打开就存在，不依赖延迟调度或登录状态。
        点「查看」打开 5 步教程；看完或点 × 后本次会话收起，下次打开重新出现。 -->
   <div class="guide-hint" id="guideHint" role="status">

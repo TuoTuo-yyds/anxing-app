@@ -1467,6 +1467,13 @@
     setTimeout(function () { XA.startLiveLocation(true); }, 300);
   }
   buildLogin();
+  /* 位置共享状态条：常驻可见，点一下即可停止（可见性 + 用户控制） */
+  XA.paintShareState = function () {
+    var bar = XA.$('#shareState');
+    if (bar) bar.classList.toggle('is-hidden', !XA.locationShared);
+  };
+  XA.paintShareState();
+
   /* 无论是否已登录，都独立安排一次新版使用引导提示（内容更新后老用户也能看到） */
   if (XA.scheduleGuideHint) XA.scheduleGuideHint();
   var profileCard = XA.$('[data-screen="profile"] .profile-card');

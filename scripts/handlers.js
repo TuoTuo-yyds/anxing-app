@@ -627,9 +627,12 @@ XA.actions = {
   },
   'nav-share': function () { XA.actions['share-trip'](); },
   'share-trip': function () {
+    /* 一致性：与「共享实时位置」「地点详情」统一为纯资料表 */
     XA.openSheet('<h3>分享行程</h3><div class="sheet-sub">仅分享行程级信息，不暴露实时精确轨迹</div>' +
-      '<div class="option-row">' + ic('users') + '<span><b>紧急联系人（3 位）</b><small>妈妈、阿哲、物业管家</small></span></div>' +
-      '<div class="option-row">' + ic('share') + '<span><b>生成行程卡片</b><small>模糊具体住址与时间</small></span></div>' +
+      '<dl class="poi-facts">' +
+        '<div class="poi-fact"><dt>接收人</dt><dd>紧急联系人 3 位 · 妈妈、阿哲、物业管家</dd></div>' +
+        '<div class="poi-fact"><dt>内容</dt><dd>行程卡片 · 模糊具体住址与时间</dd></div>' +
+      '</dl>' +
       '<button class="primary-btn" data-action="shared">确认分享行程</button>');
   },
   shared: function () { XA.closeModal(); XA.toast('行程已分享给 3 位紧急联系人'); },
@@ -663,25 +666,41 @@ XA.actions = {
     );
   },
 
-  /* 轻度：实时位置共享给紧急联系人，不报警 */
+  /* 轻度：实时位置共享给紧急联系人，不报警。
+     一致性：与「地点详情」一样用 .poi-facts 纯资料表，
+     不再用带卡片/边框/圆角的 .option-row，避免信息被误认成可点按钮。 */
   'help-share': function () {
     XA.closeModal();
     XA.openSheet(
       '<h3>共享实时位置</h3>' +
       '<div class="sheet-sub">只让信任的人知道"我在哪"，不触发报警</div>' +
-      '<div class="option-row">' + ic('users') + '<span><b>紧急联系人（3 位）</b><small>妈妈、阿哲、物业管家</small></span></div>' +
-      '<div class="option-row">' + ic('pin') + '<span><b>实时位置 · 精度 ±5m</b><small>持续共享，直到你手动停止</small></span></div>' +
-      '<div class="option-row">' + ic('shield') + '<span><b>不报警、不录音</b><small>仅位置共享，随时可停止</small></span></div>' +
+      '<dl class="poi-facts">' +
+        '<div class="poi-fact"><dt>接收人</dt><dd>紧急联系人 3 位 · 妈妈、阿哲、物业管家</dd></div>' +
+        '<div class="poi-fact"><dt>共享内容</dt><dd>实时位置（精度约 ±5 m）· 持续共享</dd></div>' +
+        '<div class="poi-fact"><dt>不会做</dt><dd>不报警、不录音、不通知警方</dd></div>' +
+        '<div class="poi-fact"><dt>如何结束</dt><dd>随时点首页「位置共享中」条即可停止</dd></div>' +
+      '</dl>' +
+      '<p class="poi-facts-note">确认后首页会常驻显示共享状态，可随时停止。</p>' +
       '<button class="primary-btn" data-action="help-share-confirm">确认共享位置</button>' +
       '<button class="ghost-btn" data-action="help-share-stop" style="margin-top:8px">取消，什么都不做</button>'
     );
   },
+  /* 可见性 / 反馈：共享状态常驻可见，用户随时能停止（兑现文案承诺） */
   'help-share-confirm': function () {
     XA.closeModal();
     XA.locationShared = true;
+    XA.paintShareState();
     XA.toast('实时位置已共享给 3 位联系人 · 不报警', 'success');
   },
-  'help-share-stop': function () { XA.closeModal(); XA.toast('已取消 · 未共享位置', 'info'); },
+  'help-share-stop': function () {
+    XA.closeModal();
+    XA.toast('已取消 · 未共享位置', 'info');
+  },
+  'help-share-end': function () {
+    XA.locationShared = false;
+    XA.paintShareState();
+    XA.toast('已停止位置共享 · 联系人不再看到你的实时位置', 'info');
+  },
 
   /* 紧急：进入原有 SOS 确认 + 倒计时流程 */
   'help-sos': function () { XA.closeModal(); XA.showSosConfirm(); },
