@@ -670,6 +670,8 @@
     var live = XA.$('#arNavLive');
     if (live) live.textContent = real ? '实时定位已联动 · ±' + Math.round(acc || 8) + ' m' : '等待实时定位';
     if (XA.onPositionChange) XA.onPositionChange(XA.position);
+    /* 导航路书只由真实 GPS 位置驱动，不再用定时器自动跳转 */
+    if (XA.onNavPosition) XA.onNavPosition(XA.position);
     if (XA.refreshGeoState) XA.refreshGeoState();
     updatePosition(lat, lng, acc);
     if (real && XA.setLocState) XA.setLocState('ok', acc, '');
@@ -1050,6 +1052,12 @@
     var idx = XA.route === 'B' ? 1 : XA.route === 'C' ? 2 : 0;
     var r = curRoutes[idx] || curRoutes[0];
     XA.realNavSteps = (r && r.steps) ? r.steps.slice(0, 12) : [];
+    XA.activeNavRoute = r || null;
+  };
+  /* 路书按真实位置推进：暴露当前选中路线的完整几何与时长，供导航页计算投影 */
+  XA.getActiveRoute = function () {
+    var idx = XA.route === 'B' ? 1 : XA.route === 'C' ? 2 : 0;
+    return curRoutes[idx] || curRoutes[0] || null;
   };
   function planRoutesWithDest(start, dest) {
     var origin = { lat: start[0], lng: start[1] }, end = { lat: dest.lat, lng: dest.lng };
@@ -1428,7 +1436,7 @@
     // 离开首页（切到其它标签）时主动结束导航，保证任何页面都能退出
     if (screen !== 'home') {
       var nav = XA.$('.nav-session');
-      if (nav) { nav.remove(); clearInterval(XA.navTimer); stopWatch(); }
+      if (nav) { nav.remove(); clearInterval(XA.navTimer); XA.onNavPosition = null; stopWatch(); }
     }
     if (screen === 'home') {
       if (!noHistory) resetHome();

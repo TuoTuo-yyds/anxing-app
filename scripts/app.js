@@ -316,6 +316,7 @@ XA.fireAlarm = function () {
   var nav = XA.$('.nav-session');
   if (nav) nav.remove();
   clearInterval(XA.navTimer);
+  XA.onNavPosition = null;   // 报警时结束导航路书订阅
   XA.go('sos', true);
   /* 演示模式：明确标识这是模拟流程，绝不假装真实报警（诚实反馈原则） */
   if (isDemo) {

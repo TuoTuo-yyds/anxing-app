@@ -247,12 +247,14 @@
   function turnText(s) {
     var mv = (s && s.maneuver) || {}, type = mv.type || '', mod = mv.modifier || '';
     var road = roadOf(s);
+    var unnamed = road === '当前道路';
     var dir = mod.indexOf('left') >= 0 ? '左转' : mod.indexOf('right') >= 0 ? '右转' : '';
-    if (type === 'depart') return '从当前位置出发 · 沿' + road + '步行';
+    if (type === 'depart') return unnamed ? '从当前位置出发 · 沿步行道前行' : '从当前位置出发 · 沿' + road + '步行';
     if (type === 'arrive') return '到达目的地附近';
-    if (type === 'new name') return '继续沿' + road + '前行';
-    if (dir) return dir + '进入' + road;
-    return '沿' + road + '前行';
+    if (type === 'new name') return unnamed ? '继续沿当前步行道前行' : '继续沿' + road + '前行';
+    /* 无名路段不要说「进入当前道路」，直接说转向动作 */
+    if (dir) return unnamed ? dir + '继续前行' : dir + '进入' + road;
+    return unnamed ? '沿当前步行道直行' : '沿' + road + '前行';
   }
   function parseRoute(rt) {
     var coords = ((rt.geometry && rt.geometry.coordinates) || []).map(function (c) { return [c[1], c[0]]; });

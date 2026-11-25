@@ -506,6 +506,7 @@ XA.startNavigation = function (mode) {
     var rawRoad = s.road;
     if (Array.isArray(rawRoad)) rawRoad = rawRoad.filter(Boolean).join('');
     var road = String(rawRoad == null ? '' : rawRoad).trim();
+    if (road === '当前道路' || road === '无名道路') road = '';
     var d = Number(s.distance) || 0;
     return {
       title: txt || ('沿' + (road || '当前道路') + '前行'),
@@ -514,43 +515,137 @@ XA.startNavigation = function (mode) {
       action: s.action || ''
     };
   }) : XA.navSteps.map(function (s) { return Object.assign({}, s, { action: '' }); });
-  var totalM = real.reduce(function (a, s) { return a + (Number(s.distance) || 0); }, 0);
-  var totalMin = real.reduce(function (a, s) { return a + (Number(s.duration) || 0); }, 0) / 60;
-  if (!real.length) { totalM = 1200; totalMin = 18; }
-  var walkedM = 0;
-  var i = 0;
-  function paint() {
-    var step = steps[i] || steps[steps.length - 1];
-    var set = function (sel, val) { var el = XA.$(sel, box); if (el) el.textContent = val; };
+  /* ---------- 路书完全由真实 GPS 位置驱动 ----------
+     旧实现用 setInterval 每 4 秒自动 i++，与用户是否移动无关（自动跳转 bug）。
+     现在：把 GPS 点投影到当前路线的真实折线上，算出"沿路线已走过的距离"，
+     据此决定当前转向步骤、距转折点、剩余距离与剩余时长。位置不推进，路书就不动。 */
+  var route = XA.getActiveRoute ? XA.getActiveRoute() : null;
+  var coords = (route && route.coords) || [];
+  var stepLens = steps.map(function (s) { return Number(s.dist) || 0; });
+  var stepTotal = stepLens.reduce(function (a, b) { return a + b; }, 0);
+  var totalM = (route && Number(route.distance)) || stepTotal || 1200;
+  var totalSec = (route && Number(route.seconds)) ||
+                 real.reduce(function (a, s) { return a + (Number(s.duration) || 0); }, 0) || 1080;
+  /* 把各步骤距离映射到路线总长，得到每个转折点的里程位置 */
+  var stepEnds = [], acc = 0;
+  var scale = stepTotal > 0 ? totalM / stepTotal : 0;
+  stepLens.forEach(function (d) { acc += d * scale; stepEnds.push(acc); });
+
+  function segLenM(a, b) {
+    var dy = (b[0] - a[0]) * 111320, dx = (b[1] - a[1]) * 111320 * Math.cos(a[0] * Math.PI / 180);
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+  /* 点到线段的投影：返回 { along, off }，along 为该段起点到投影点的距离，off 为垂距 */
+  function project(a, b, lat, lng) {
+    var kx = 111320 * Math.cos(a[0] * Math.PI / 180), ky = 111320;
+    var ax = a[1] * kx, ay = a[0] * ky, bx = b[1] * kx, by = b[0] * ky;
+    var px = lng * kx, py = lat * ky;
+    var vx = bx - ax, vy = by - ay, wx = px - ax, wy = py - ay;
+    var len2 = vx*vx + vy*vy;
+    var t = len2 > 0 ? Math.max(0, Math.min(1, (wx*vx + wy*vy) / len2)) : 0;
+    var cx = ax + t*vx, cy = ay + t*vy;
+    return { along: Math.sqrt(len2) * t, off: Math.sqrt((px-cx)*(px-cx) + (py-cy)*(py-cy)) };
+  }
+  /* 沿整条折线累计，找出距 GPS 最近的段，得到已走里程与偏离距离 */
+  function progressOnRoute(lat, lng) {
+    if (coords.length < 2) return null;
+    var best = { off: Infinity, along: 0 }, before = 0, total = 0;
+    for (var k = 0; k < coords.length - 1; k++) {
+      var L = segLenM(coords[k], coords[k+1]);
+      var p = project(coords[k], coords[k+1], lat, lng);
+      if (p.off < best.off) best = { off: p.off, along: before + p.along };
+      before += L; total = before;
+    }
+    return { walked: Math.max(0, Math.min(total, best.along)), offRoute: best.off, len: total };
+  }
+
+  var curStep = 0, arrived = false, lastAnnounced = -1;
+  var waitedHint = false;
+  var set = function (sel, val) { var el = XA.$(sel, box); if (el) el.textContent = val; };
+
+  function paintAt(walked, total, offRoute, gpsOk) {
+    var leftM = Math.max(0, total - walked);
+    /* 路线里程已走完或距终点很近 → 到达 */
+    if (gpsOk && (leftM < 25 || (offRoute < 30 && walked > total * 0.985))) {
+      if (!arrived) {
+        arrived = true;
+        set('#turnTitle', '已到达目的地附近');
+        set('#turnSub', '请观察现场环境，确认安全后结束导航');
+        set('#turnDist', '0');
+        set('#navDist', '0.0');
+        set('#navRemain', '0');
+        XA.toast('已到达目的地附近 · 请确认安全后结束导航', 'success');
+      }
+      return;
+    }
+    /* 只在真正走过转折点时前进；GPS 抖动不会让步骤来回跳 */
+    var idx = curStep;
+    while (idx < stepEnds.length - 1 && walked >= stepEnds[idx] - 5) idx++;
+    curStep = idx;
+    var step = steps[idx] || steps[steps.length - 1];
+    var toTurn = Math.max(0, Math.round((stepEnds[idx] || total) - walked));
     set('#turnTitle', step.title);
     set('#turnSub', step.sub);
-    set('#turnDist', String(step.dist).replace(/[^\d.]/g, '') || '30');
-    var leftM = Math.max(0, totalM - walkedM);
-    set('#navRemain', Math.max(1, Math.ceil(totalMin * leftM / Math.max(totalM, 1))));
+    set('#turnDist', String(toTurn));
     set('#navDist', (leftM / 1000).toFixed(1));
+    set('#navRemain', Math.max(1, Math.ceil(totalSec / 60 * leftM / Math.max(total, 1))));
     var arrow = XA.$('.nav-info-icon .ico, .turn-arrow .ico', box);
     if (arrow) {
       var a = String(step.action || '');
       arrow.style.transform = /左/.test(a) ? 'rotate(-90deg)' : /右/.test(a) ? 'rotate(90deg)' : 'rotate(0deg)';
     }
     XA.$$('.nav-step', box).forEach(function (el, j) {
-      el.classList.toggle('done', j < i);
-      el.classList.toggle('active', j === i);
+      el.classList.toggle('done', j < idx);
+      el.classList.toggle('active', j === idx);
     });
+    /* 播报只在真实跨越到新步骤时发生，不再定时播报 */
+    if (gpsOk && idx !== lastAnnounced) {
+      if (lastAnnounced >= 0) {
+        XA.toast(step.title);
+        if (XA.settings && XA.settings.voice && 'speechSynthesis' in window) {
+          try {
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(step.title));
+          } catch (e) {}
+        }
+      }
+      lastAnnounced = idx;
+    }
   }
-  paint();
-  XA.navTimer = setInterval(function () {
-    walkedM += Number((steps[i] || {}).dist) || 0;
-    i++;
-    if (i >= steps.length) {
-      clearInterval(XA.navTimer);
-      XA.toast('路线指引已结束 · 请观察现场并主动结束导航');
+
+  /* 初始态：无 GPS 时保持第 1 步不动，并明确说明在等待定位，绝不假装导航已开始 */
+  function paintWaiting() {
+    var step = steps[0] || { title: '准备出发', sub: '', dist: '0' };
+    set('#turnTitle', step.title);
+    set('#turnSub', '等待 GPS 定位 · 路线指引会随你的移动更新');
+    set('#turnDist', String(step.dist).replace(/[^\d.]/g, '') || '—');
+    set('#navDist', (totalM / 1000).toFixed(1));
+    set('#navRemain', Math.ceil(totalSec / 60));
+  }
+  paintWaiting();
+
+  XA.onNavPosition = function (pos) {
+    if (!box.isConnected) { XA.onNavPosition = null; return; }
+    if (!pos || !pos.real || !isFinite(pos.lat) || !isFinite(pos.lng)) {
+      if (!waitedHint) {
+        waitedHint = true;
+        XA.toast('等待 GPS 定位 · 允许位置权限后路书才会随移动更新', 'info');
+      }
+      paintWaiting();
       return;
     }
-    paint();
-    XA.toast(steps[i].title);
-  }, 4000);
-  XA.toast(ar ? 'AR 眼镜导航已开始 · 抬头看路' : '安全导航已开始 · 安星陪你走夜路');
+    var pr = progressOnRoute(pos.lat, pos.lng);
+    if (!pr) return;
+    /* 偏离路线超过 60m：不推进步骤，明确提示，避免错误信息 */
+    if (pr.offRoute > 60) {
+      set('#turnSub', '已偏离路线约 ' + Math.round(pr.offRoute) + ' m · 请回到规划路线');
+      return;
+    }
+    paintAt(pr.walked, pr.len || totalM, pr.offRoute, true);
+  };
+  /* 若进入导航时已有有效定位，立即用当前位置画一次 */
+  if (XA.position && XA.position.real) XA.onNavPosition(XA.position);
+  XA.toast(ar ? 'AR 眼镜导航已开始 · 抬头看路' : '安全导航已开始 · 路书将随你的移动更新');
 };
 
 var _earlyActions = XA.actions;   // 保留 app.js 中提前注册的取消报警身份验证动作
@@ -626,6 +721,8 @@ XA.actions = {
     var nav = XA.$('.nav-session');
     if (nav) { nav.classList.remove('open'); setTimeout(function () { nav.remove(); }, 360); }
     clearInterval(XA.navTimer);
+    XA.onNavPosition = null;          // 停止路书订阅
+    if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel(); } catch (e) {} }
     XA.toast('已退出导航 · 行程记录已保存');
   },
   'nav-share': function () { XA.actions['share-trip'](); },
