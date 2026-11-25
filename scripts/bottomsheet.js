@@ -20,7 +20,7 @@
       ['深夜食堂', '治愈吃播 · 热汤面', 'play', 'cv-rose', 'video'],
       ['雨夜白噪音', '街声与伞面细雨', 'music', 'cv-blue', 'radio'],
       ['解压时刻', 'AI Cols 爽剧精选', 'play', 'cv-violet', 'video'],
-      ['夜行歌单', '城市微光 · 慢走节拍', 'music', 'cv-mint', 'radio'],
+      ['伴行歌单', '果宝特攻DJ · Hit the Road, Jack', 'music', 'cv-mint', 'radio'],
       ['枕边有声书', '夜行便利店 · 第 1 章', 'play', 'cv-slate', 'book']
     ];
     var grid = cards.map(function (c) {

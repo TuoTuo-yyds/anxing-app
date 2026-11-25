@@ -1495,3 +1495,36 @@ html[data-scheme="light"] .share-state-stop{background:rgba(31,143,131,.1);color
    modal-layer(160) 之上挡住「确认共享位置」等主操作按钮。
    关闭弹层后自动恢复，不影响「一打开就有教程入口」。 */
 #phone.modal-open .guide-hint{opacity:0;pointer-events:none;transition:opacity .18s}
+
+
+/* =========================================================
+   真实音频导入（音源面板）
+   ========================================================= */
+.audio-status{display:flex;align-items:center;gap:11px;padding:11px 12px;margin:10px 0 8px;
+  border-radius:14px;background:rgba(255,196,107,.08);border:1px solid rgba(255,196,107,.28);color:var(--text)}
+.audio-status.ok{background:rgba(127,240,212,.08);border-color:rgba(127,240,212,.3)}
+.audio-status .ico{width:20px;height:20px;flex:none;color:var(--amber)}
+.audio-status.ok .ico{color:var(--mint)}
+.audio-status span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.audio-status b{font-size:12px;font-weight:700}
+.audio-status small{font-size:10px;color:var(--muted)}
+.audio-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);
+  padding:9px 2px;color:var(--text);cursor:pointer;font:inherit}
+.audio-row:active{background:rgba(127,240,212,.07)}
+.audio-row:hover{background:rgba(255,255,255,.03)}
+.audio-row span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.audio-row b{font-size:11px;font-weight:700}
+.audio-row small{font-size:9px;color:var(--muted)}
+.audio-row em{font-style:normal;font-size:12px;color:var(--muted);flex:none}
+.audio-row em.ok{color:var(--mint);font-weight:800}
+
+
+/* 可选的官方页面入口：与「APP 内播放」主路径明确区分 */
+.audio-links{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.audio-links>small{width:100%;font-size:9px;color:var(--dim);margin-bottom:2px}
+.audio-link-btn{flex:none;padding:5px 10px;border-radius:9px;font-size:9px;
+  color:var(--muted);background:rgba(255,255,255,.05);
+  border:1px solid var(--line);cursor:pointer}
+.audio-link-btn:active{background:rgba(127,240,212,.14);color:var(--mint)}

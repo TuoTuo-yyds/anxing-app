@@ -49,10 +49,10 @@ XA.I18N = {
     syncBookshelfTip: '演示同步：将番茄小说书架中的作品加入伴行页。真实环境需番茄开放平台授权。',
     listening: '正在播放', paused: '已暂停', readDuration: '预计 12 分钟',
     musicSource: '音源', sourceLocal: '安星本地歌单', sourceNetease: '跳转网易云音乐', sourceQQ: '跳转 QQ 音乐',
-    sourceSheetSub: '选择音源；除本地歌单外均为概念跳转，播放器展示模拟数据。',
-    sourceDemoTip: '网页无法读取其他 App 的真实后台播放信息，歌名、歌词、封面和进度均为模拟演示数据。',
-    sourceLocalOn: '已切换到安星本地歌单', sourceNeteaseOn: '正在唤起网易云音乐（概念演示）', sourceQQOn: '正在唤起 QQ 音乐（概念演示）',
-    playlistNight: '夜行歌单', playlistRain: '雨夜白噪音', playlistHint: '点击歌曲立即播放 · 概念演示',
+    sourceSheetSub: '导入音频文件后，点播放即可在 APP 内直接收听完整歌曲。',
+    sourceDemoTip: '分享页链接不是音频文件，无法在 APP 内直接播放；请导入你拥有合法使用权的音频文件或填入音频直链。文件只保存在你的设备，不会上传或随网页公开。',
+    sourceLocalOn: '已切换到安星本地歌单', sourceNeteaseOn: '正在唤起网易云音乐', sourceQQOn: '正在唤起 QQ 音乐',
+    playlistNight: '伴行歌单', playlistRain: '雨夜白噪音', playlistHint: '导入音频后点击即可播放',
     setWhiteNoise: '已切换为雨夜白噪音歌单', playTrack: '播放'
   },
   en: {
@@ -105,10 +105,10 @@ XA.I18N = {
     syncBookshelfTip: 'Demo sync: add novels from a Fanqie bookshelf. Real sync requires platform authorization.',
     listening: 'Playing', paused: 'Paused', readDuration: 'About 12 min',
     musicSource: 'Source', sourceLocal: 'Anxing local playlist', sourceNetease: 'Open NetEase Cloud Music', sourceQQ: 'Open QQ Music',
-    sourceSheetSub: 'Choose a source. Only the local playlist is real; other options are concept redirects with demo data.',
-    sourceDemoTip: 'Web pages cannot read real background playback from other apps. Track, lyric, cover and progress are simulated.',
-    sourceLocalOn: 'Switched to Anxing local playlist', sourceNeteaseOn: 'Opening NetEase Cloud Music (demo)', sourceQQOn: 'Opening QQ Music (demo)',
-    playlistNight: 'Night walk playlist', playlistRain: 'Rainy night white noise', playlistHint: 'Tap a track to play · concept demo',
+    sourceSheetSub: 'Import audio files to play full songs directly inside the app.',
+    sourceDemoTip: 'Share-page links are web pages, not audio files, and cannot play in-app. Import audio you own or paste a direct audio URL. Files stay on your device and are never uploaded.',
+    sourceLocalOn: 'Switched to Anxing local playlist', sourceNeteaseOn: 'Opening NetEase Cloud Music', sourceQQOn: 'Opening QQ Music',
+    playlistNight: 'Companion playlist', playlistRain: 'Rainy night white noise', playlistHint: 'Import audio, then tap to play',
     setWhiteNoise: 'Switched to rainy night white noise', playTrack: 'Play'
   }
 };
@@ -147,11 +147,14 @@ XA.openSheet = function (html) {
 
 XA.playlists = {
   night: {
-    name: '夜行歌单',
+    name: '伴行歌单',
     tracks: [
-      { title: '夜航', artist: '安星电台 · 夜行歌单', subtitle: '给独行路上的一点温柔', lyric: '路灯把影子拉得很长，风吹散一整天的慌张 · 跟着节拍慢慢走', duration: 372, src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', coverClass: 'cover-night' },
-      { title: '城市微光', artist: '安星电台 · 城市漫游', subtitle: '车流与人声都变得柔软', lyric: '每一盏灯都在替我说晚安，街角的风也学会了放慢脚步', duration: 364, src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', coverClass: 'cover-city-glow' },
-      { title: '晚风频道', artist: '安星电台 · 慢走节拍', subtitle: '把步调交给晚风', lyric: '不用走得很快，晚风会替你把答案轻轻带来', duration: 321, src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', coverClass: 'cover-rain' }
+      /* link 为汽水音乐官方分享页：点播放直接打开官方页面收听完整正版歌曲。
+         src 为可选的本地/直链音频；若提供了可用音频则优先在 APP 内完整播放。
+         两者都不伪造示例音频。 */
+      { title: '果宝特攻DJ(管弦版)', artist: '汽水音乐 · 完整歌曲', subtitle: '导入音频后点播放即出声', short: '果宝DJ', audioId: 'guobao_dj', duration: 193, src: 'assets/audio/guobao_dj.mp3', link: 'https://qishui.douyin.com/s/i4JcwYsg/', coverClass: 'cover-fruity' },
+      { title: 'Hit the Road, Jack', artist: '汽水音乐 · 完整歌曲', subtitle: '导入音频后点播放即出声', short: 'Jack', audioId: 'hit_the_road', duration: 90, src: 'assets/audio/hit_the_road.mp3', link: 'https://qishui.douyin.com/s/i4J38FkQ/', coverClass: 'cover-forest' },
+      { title: '当那一天来临', artist: '汽水音乐 · 完整歌曲', subtitle: '导入音频后点播放即出声', short: '军歌', audioId: 'dangnayitian', duration: 168, src: 'assets/audio/dangnayitian.mp3', link: 'https://qishui.douyin.com/s/i4J3Rh2T/', coverClass: 'cover-march' }
     ]
   },
   rain: {
@@ -165,6 +168,100 @@ XA.playlists = {
 XA.activePlaylist = 'night';
 XA.tracks = XA.playlists.night.tracks.slice();
 XA.musicSource = 'local';
+
+/* ---------- 真实音频源 ----------
+   歌单只记录曲目信息，音频由用户提供（从正规渠道获取的正版文件）。
+   导入的音频以 Blob 存在浏览器 IndexedDB 中，仅在本机播放，不上传、不公开；
+   刷新后自动恢复。也支持把文件直接放到 assets/audio/ 下作为预置音源。 */
+XA.audioSources = {};                    // audioId -> objectURL
+XA.audioLocalCount = 0;
+var AUDIO_DB = 'anxing_audio_v1';
+var AUDIO_IDS = ['guobao_dj', 'hit_the_road', 'dangnayitian'];
+var AUDIO_MATCH = [
+  { id: 'guobao_dj',    re: /果宝|guobao|管弦|DJ/i },
+  { id: 'hit_the_road', re: /hit.?the.?road|jack|杰克/i },
+  { id: 'dangnayitian', re: /那一天|来临|dangna|军歌/i }
+];
+function audioDB() {
+  return new Promise(function (resolve, reject) {
+    if (!window.indexedDB) { reject(new Error('IndexedDB unavailable')); return; }
+    var req = indexedDB.open(AUDIO_DB, 1);
+    req.onupgradeneeded = function () {
+      var db = req.result;
+      if (!db.objectStoreNames.contains('tracks')) db.createObjectStore('tracks');
+    };
+    req.onsuccess = function () { resolve(req.result); };
+    req.onerror = function () { reject(req.error); };
+  });
+}
+function audioPut(id, blob) {
+  return audioDB().then(function (db) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction('tracks', 'readwrite');
+      tx.objectStore('tracks').put(blob, id);
+      tx.oncomplete = resolve; tx.onerror = function () { reject(tx.error); };
+    });
+  });
+}
+function audioDelete(id) {
+  return audioDB().then(function (db) {
+    return new Promise(function (resolve) {
+      var tx = db.transaction('tracks', 'readwrite');
+      tx.objectStore('tracks').delete(id);
+      tx.oncomplete = resolve; tx.onerror = resolve;
+    });
+  }).catch(function () {});
+}
+/* 启动时恢复上次导入的音频 */
+function restoreAudioSources() {
+  return audioDB().then(function (db) {
+    return new Promise(function (resolve) {
+      var tx = db.transaction('tracks', 'readonly'), st = tx.objectStore('tracks');
+      var req = st.openCursor(), n = 0;
+      req.onsuccess = function () {
+        var cur = req.result;
+        if (!cur) { resolve(n); return; }
+        if (AUDIO_IDS.indexOf(cur.key) >= 0 && cur.value) {
+          try { XA.audioSources[cur.key] = URL.createObjectURL(cur.value); n++; } catch (e) {}
+        }
+        cur.continue();
+      };
+      req.onerror = function () { resolve(n); };
+    });
+  }).then(function (n) {
+    XA.audioLocalCount = Object.keys(XA.audioSources).length;
+    if (XA.updatePlayer) XA.updatePlayer();
+  }).catch(function () {});
+}
+restoreAudioSources();
+/* 三首音频文件已随项目放入 assets/audio/，直接标记为可用。
+   不做启动期 HEAD 探测：那会在页面加载阶段发出额外请求、抢占媒体缓冲，
+   而且部分服务器不允许 HEAD 会误判。文件真的缺失时由 audio 的 error 事件明确提示。 */
+XA.audioPreset = {};
+XA.playlists.night.tracks.forEach(function (t) {
+  if (t.src && t.audioId) XA.audioPreset[t.audioId] = true;
+});
+/* 已就绪曲目数：设备导入的 + 内置直链/本地文件，供状态展示使用 */
+XA.audioReadyCount = function () {
+  var ids = {};
+  Object.keys(XA.audioSources).forEach(function (k) { ids[k] = 1; });
+  Object.keys(XA.audioPreset).forEach(function (k) { ids[k] = 1; });
+  return Object.keys(ids).length;
+};
+/* 当前曲目可用的真实音频地址；没有就返回空串（绝不回落到示例音频）。
+   无 audioId 的曲目（雨夜白噪音等自带免版权环境声）直接沿用其 src。 */
+XA.trackSrc = function (t) {
+  if (!t) return '';
+  if (!t.audioId) return t.src || '';
+  if (XA.audioSources[t.audioId]) return XA.audioSources[t.audioId];
+  if (XA.audioPreset[t.audioId] && t.src) return t.src;
+  return '';
+};
+XA.hasRealAudio = function (t) {
+  if (!t) return false;
+  if (!t.audioId) return !!t.src;
+  return !!(XA.audioSources[t.audioId] || XA.audioPreset[t.audioId]);
+};
 XA.books = [
   { title: '夜行便利店', author: '林间晚风', tags: '#都市治愈 #温暖夜归', coverClass: 'book-c1', coverWord: '夜行便利店', icon: 'pin', chapters: [
     { title: '第 1 章 · 深夜的第一盏灯', text: '城市的夜色像一条缓慢流动的河。林夏走进街角便利店时，门口的风铃轻轻响了一声。热柜里最后一盒饭团还冒着热气，店员笑着点点头：今天也辛苦了。' },
@@ -338,19 +435,29 @@ XA.openBookPlayer = function (index) {
   XA.paintBookPlayer();
 };
 XA.trackIndex = 0;
-XA.progressSec = 102;
+/* 播放进度从 0 开始；真实时长由音频文件的 loadedmetadata 提供 */
+XA.progressSec = 0;
 XA.playing = false;
 XA.audio = null;
+XA.audioError = false;
 XA.ensureAudio = function () {
   if (!XA.audio) {
     XA.audio = new Audio();
-    XA.audio.preload = 'metadata';
+    XA.audio.preload = 'auto';   // 主动缓冲，点播放即刻出声（拖动进度也依赖缓冲）
     XA.audio.addEventListener('timeupdate', function () {
       XA.progressSec = Math.floor(XA.audio.currentTime);
       XA.updatePlayer();
     });
-    XA.audio.addEventListener('loadedmetadata', function () { XA.updatePlayer(); });
+    XA.audio.addEventListener('loadedmetadata', function () { XA.audioError = false; XA.updatePlayer(); });
     XA.audio.addEventListener('ended', function () { XA.setTrack(1); });
+    /* 音频缺失/格式不支持时明确告知，不静默、不回落示例音频 */
+    XA.audio.addEventListener('error', function () {
+      XA.audioError = true;
+      XA.playing = false;
+      XA.updatePlayer();
+      var t = XA.tracks[XA.trackIndex];
+      XA.toast('《' + (t ? t.title : '当前曲目') + '》还没有音频文件 · 请在「音源」中导入', 'warn');
+    });
   }
   return XA.audio;
 };
@@ -360,13 +467,22 @@ XA.updatePlayer = function () {
   var set = function (sel, val) { var el = XA.$(sel); if (el) el.textContent = val; };
   set('#trackTitle', t.title);
   set('#trackArtist', t.artist);
-  set('#trackSubtitle', t.subtitle || '安星电台 · 概念演示');
-  set('#trackLyric', t.lyric);
+  set('#trackSubtitle', t.subtitle || '伴行歌单');
+  /* 跑马灯显示真实状态；白噪音歌单没有 audioId，保留原本的环境声描述 */
+  if (t.audioId) {
+    var real = XA.hasRealAudio(t);
+    set('#trackLyric', real
+      ? '《' + t.title + '》完整歌曲 · 点播放即可在 APP 内收听'
+      : '《' + t.title + '》待导入音频 · 在「音源」导入后点播放即出声');
+  } else {
+    set('#trackLyric', t.lyric || '');
+  }
   var fmt = function (s) { return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0'); };
-  var dur = (XA.audio && isFinite(XA.audio.duration) && XA.audio.duration > 0) ? XA.audio.duration : t.duration;
-  var pct = Math.min(100, XA.progressSec / dur * 100);
-  set('#trackCurrent', fmt(XA.progressSec));
-  set('#trackDuration', fmt(dur));
+  var metaDur = (XA.audio && !XA.audioError && isFinite(XA.audio.duration) && XA.audio.duration > 0) ? XA.audio.duration : 0;
+  var dur = metaDur || t.duration || 1;
+  var pct = metaDur ? Math.min(100, XA.progressSec / dur * 100) : 0;
+  set('#trackCurrent', metaDur ? fmt(XA.progressSec) : '0:00');
+  set('#trackDuration', metaDur ? fmt(dur) : '--:--');
   var bar = XA.$('#trackProgress');
   if (bar) bar.style.width = pct + '%';
   var vinyl = XA.$('#vinyl');
@@ -378,9 +494,14 @@ XA.updatePlayer = function () {
   var marquee = XA.$('.lyric-marquee');
   if (marquee) marquee.classList.toggle('playing', XA.playing);
   var vinylLabel = XA.$('.vinyl>span b');
-  if (vinylLabel) vinylLabel.textContent = t.title;
+  if (vinylLabel) vinylLabel.textContent = t.short || t.title;
+  var vinylSub = XA.$('.vinyl>span small');
+  if (vinylSub) vinylSub.textContent = '伴行歌单';
   var source = XA.$('#musicSourceLabel');
-  if (source) source.textContent = XA.t(XA.musicSource === 'netease' ? 'sourceNetease' : XA.musicSource === 'qq' ? 'sourceQQ' : 'sourceLocal');
+  if (source) {
+    var n = XA.audioReadyCount();
+    source.textContent = n ? ('APP 内播放 · 已就绪 ' + n + '/3 首') : '导入音频以直接播放';
+  }
   var btn = XA.$('[data-action="play"]');
   if (btn) btn.innerHTML = ic(XA.playing ? 'pause' : 'play');
 };
@@ -388,11 +509,12 @@ XA.updatePlayer = function () {
 XA.setTrack = function (delta) {
   XA.trackIndex = (XA.trackIndex + delta + XA.tracks.length) % XA.tracks.length;
   XA.progressSec = 0;
+  XA.audioError = false;
   var a = XA.ensureAudio();
   a.pause();
-  a.src = XA.tracks[XA.trackIndex].src;
-  a.load();
-  if (XA.playing) a.play().catch(function () {});
+  var src = XA.trackSrc(XA.tracks[XA.trackIndex]);
+  if (src) { a.src = src; a.load(); XA._audioSrc = src; if (XA.playing) a.play().catch(function () {}); }
+  else { a.removeAttribute('src'); a.load(); XA._audioSrc = ''; XA.playing = false; }
   XA.updatePlayer();
   XA.toast('已切换到《' + XA.tracks[XA.trackIndex].title + '》');
 };
@@ -422,11 +544,35 @@ XA.playPlaylistTrack = function (key, index) {
   XA.trackIndex = index;
   XA.progressSec = 0;
   var a = XA.ensureAudio();
-  a.pause(); a.src = pl.tracks[index].src; a.load();
-  XA.playing = true;
-  a.play().catch(function () { XA.toast(XA.lang === 'en' ? 'Playback was blocked, tap play again' : '音频播放被拦截，请再次点击播放'); });
+  a.pause();
+  XA.audioError = false;
+  var src = XA.trackSrc(pl.tracks[index]);
+  if (src) {
+    a.src = src; a.load(); XA._audioSrc = src;
+    XA.playing = true;
+    a.play().catch(function () { XA.toast(XA.lang === 'en' ? 'Playback was blocked, tap play again' : '音频播放被拦截，请再次点击播放'); });
+  } else {
+    a.removeAttribute('src'); a.load(); XA._audioSrc = ''; XA.playing = false;
+    XA.toast('《' + pl.tracks[index].title + '》暂无音频文件 · 请在「音源」中导入后即可直接播放', 'warn');
+  }
   XA.updatePlayer(); XA.renderPlaylistCards(); XA.closeModal();
-  XA.toast('正在播放《' + pl.tracks[index].title + '》' + (key === 'rain' ? ' · ' + XA.t('setWhiteNoise') : ''));
+  if (src) XA.toast('正在播放《' + pl.tracks[index].title + '》' + (key === 'rain' ? ' · ' + XA.t('setWhiteNoise') : ''));
+};
+
+/* 打开曲目在汽水音乐的官方页面收听完整版本。
+   分享页不是音频文件，浏览器无法把它当 <audio src> 播放；
+   用官方页面收听既是能真正听到完整歌曲的方式，也尊重版权。 */
+XA.openTrackLink = function (t) {
+  if (!t || !t.link) return false;
+  XA.playing = false;
+  var a = XA.audio; if (a) a.pause();
+  XA.updatePlayer();
+  XA.toast('正在打开汽水音乐 · 收听《' + t.title + '》完整版');
+  try {
+    var w = window.open(t.link, '_blank', 'noopener,noreferrer');
+    if (!w) window.location.href = t.link;      // 弹窗被拦截时退回当前页跳转
+  } catch (e) { window.location.href = t.link; }
+  return true;
 };
 
 XA.openExternalMusic = function (source) {
@@ -823,9 +969,18 @@ XA.actions = {
   },
   'ar-entry': function () { XA.go('ar'); },
   play: function () {
-    XA.playing = !XA.playing;
+    var t = XA.tracks[XA.trackIndex], src = XA.trackSrc(t);
     var a = XA.ensureAudio();
-    if (!a.src) a.src = XA.tracks[XA.trackIndex].src;
+    if (!src) {
+      /* 播放键只在 APP 内工作：没有音频文件时明确提示，绝不跳转到外部页面 */
+      XA.playing = false; a.pause(); XA.updatePlayer();
+      XA.toast('《' + t.title + '》暂无音频文件 · 请在「音源」中导入后即可直接播放', 'warn');
+      return;
+    }
+    /* 用自己记录的 XA._audioSrc 比较：a.src 会被浏览器转成绝对 URL，
+       直接与相对路径比较会永远不等，导致每次点播放都重新 load()。 */
+    if (XA._audioSrc !== src) { a.src = src; a.load(); XA._audioSrc = src; XA.audioError = false; }
+    XA.playing = !XA.playing;
     if (XA.playing) a.play().catch(function () { XA.toast('音频播放被拦截，请再次点击播放'); });
     else a.pause();
     XA.updatePlayer();
@@ -843,11 +998,109 @@ XA.actions = {
     XA.playPlaylistTrack((el && el.dataset.playlist) || 'night', parseInt((el && el.dataset.trackIndex) || '0', 10));
   },
   'music-source': function () {
-    XA.openSheet('<h3 data-i18n="musicSource">音源</h3><div class="sheet-sub" data-i18n="sourceSheetSub">选择音源；除本地歌单外均为概念跳转，播放器展示模拟数据。</div>' +
-      '<button class="option-row" data-action="music-source-set" data-source="local">' + ic('music') + '<span><b data-i18n="sourceLocal">安星本地歌单</b><small>真实音频播放 · 来自安星内置示例音源</small></span></button>' +
-      '<button class="option-row" data-action="music-source-set" data-source="netease">' + ic('play') + '<span><b data-i18n="sourceNetease">跳转网易云音乐</b><small>URL Scheme: orpheus://</small></span></button>' +
-      '<button class="option-row" data-action="music-source-set" data-source="qq">' + ic('play') + '<span><b data-i18n="sourceQQ">跳转 QQ 音乐</b><small>URL Scheme: qqmusic://</small></span></button>' +
+    var n = XA.audioReadyCount();
+    XA.openSheet('<h3 data-i18n="musicSource">音源</h3>' +
+      '<div class="sheet-sub">' + XA.t('sourceSheetSub') + '</div>' +
+      '<div class="audio-status' + (n ? ' ok' : '') + '" id="audioStatus">' + ic(n ? 'check' : 'music') +
+        '<span><b>' + (n ? n + ' / 3 首音频已导入 · 点播放即可在 APP 内收听' : '尚未导入音频') + '</b><small>' +
+        (n ? '文件只保存在你的设备，刷新后仍可播放' : '导入音频文件后，点播放就直接出声') + '</small></span></div>' +
+      XA.playlists.night.tracks.map(function (t, i) {
+        var has = XA.hasRealAudio(t);
+        return '<div class="audio-row">' +
+          '<span><b>' + fqEsc(t.title) + '</b><small>' +
+          (has ? '已导入 · 点播放直接收听' : '未导入 · 文件名建议 ' + t.audioId + '.mp3') + '</small></span>' +
+          '<em class="' + (has ? 'ok' : '') + '">' + (has ? '✓' : '—') + '</em></div>';
+      }).join('') +
+      '<button class="primary-btn" data-action="import-audio" style="margin-top:12px">导入音频文件（一次选 3 个）</button>' +
+      '<div class="form-row" style="margin-top:10px"><label>或为当前曲目填入音频文件直链</label>' +
+        '<input class="sheet-input" id="audioUrlInput" placeholder="https://…/song.mp3" autocomplete="off"></div>' +
+      '<button class="ghost-btn" data-action="set-audio-url" style="margin-top:8px">使用这个音频链接</button>' +
+      (n ? '<button class="ghost-btn" data-action="clear-audio" style="margin-top:8px">清除已导入的音频</button>' : '') +
+      '<div class="audio-links"><small>可选 · 在汽水音乐官方页面收听：</small>' +
+        XA.playlists.night.tracks.map(function (t, i) {
+          return '<button class="audio-link-btn" data-action="open-track-link" data-track-index="' + i + '">' +
+            fqEsc(t.title) + ' ↗</button>';
+        }).join('') + '</div>' +
       '<p class="sheet-note">' + XA.t('sourceDemoTip') + '</p>');
+  },
+  'open-track-link': function (el) {
+    var i = parseInt((el && el.dataset.trackIndex) || '0', 10);
+    var t = XA.playlists.night.tracks[i];
+    if (t) XA.openTrackLink(t);
+  },
+  /* 从设备选择正版音频文件；按文件名自动对应三首歌，也可一次选多个按顺序填充 */
+  'import-audio': function () {
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'audio/*,.mp3,.m4a,.aac,.ogg,.wav,.flac'; inp.multiple = true;
+    inp.addEventListener('change', function () {
+      var files = Array.prototype.slice.call(inp.files || []);
+      if (!files.length) return;
+      var assigned = [];
+      files.forEach(function (f) {
+        var hit = AUDIO_MATCH.filter(function (m) { return m.re.test(f.name); })[0];
+        if (hit && !XA.audioSources[hit.id]) assigned.push({ id: hit.id, file: f });
+      });
+      var used = assigned.map(function (x) { return x.id; });
+      var rest = AUDIO_IDS.filter(function (id) { return used.indexOf(id) < 0; });
+      files.forEach(function (f) {
+        if (assigned.some(function (x) { return x.file === f; })) return;
+        if (!rest.length) return;
+        var id = rest.shift();
+        if (!XA.audioSources[id]) assigned.push({ id: id, file: f });
+      });
+      Promise.all(assigned.map(function (x) {
+        return audioPut(x.id, x.file).then(function () {
+          if (XA.audioSources[x.id]) { try { URL.revokeObjectURL(XA.audioSources[x.id]); } catch (e) {} }
+          XA.audioSources[x.id] = URL.createObjectURL(x.file);
+        });
+      })).then(function () {
+        XA.audioLocalCount = Object.keys(XA.audioSources).length;
+        XA.closeModal();
+        XA.audioError = false;
+        var a = XA.ensureAudio(), t = XA.tracks[XA.trackIndex], src = XA.trackSrc(t);
+        a.pause();
+        if (src) {
+          a.src = src; a.load(); XA._audioSrc = src; XA.progressSec = 0; XA.playing = true;
+          a.play().catch(function () { XA.toast('导入成功 · 点播放开始收听', 'success'); });
+        }
+        XA.updatePlayer();
+        XA.toast('已导入 ' + assigned.length + ' 首真实音频 · 文件只保存在你的设备', 'success');
+      }).catch(function () {
+        XA.toast('导入失败 · 请检查浏览器是否允许本地存储', 'warn');
+      });
+    });
+    inp.click();
+  },
+  'set-audio-url': function () {
+    var el = XA.$('#audioUrlInput'), url = el ? String(el.value || '').trim() : '';
+    if (!/^https?:\/\//i.test(url)) { XA.toast('请填入 http(s) 开头的音频直链'); return; }
+    var t = XA.tracks[XA.trackIndex];
+    XA.audioSources[t.audioId] = url;
+    XA.audioLocalCount = Object.keys(XA.audioSources).length;
+    XA.closeModal();
+    var a = XA.ensureAudio(); a.pause(); a.src = url; a.load();
+    XA._audioSrc = url; XA.progressSec = 0;
+    XA.audioError = false; XA.playing = true;
+    a.play().catch(function () { XA.toast('链接已设置 · 点播放开始收听', 'success'); });
+    XA.updatePlayer();
+    XA.toast('已为《' + t.title + '》设置音频链接', 'success');
+  },
+  'clear-audio': function () {
+    AUDIO_IDS.forEach(function (id) {
+      if (XA.audioSources[id]) {
+        if (String(XA.audioSources[id]).indexOf('blob:') === 0) {
+          try { URL.revokeObjectURL(XA.audioSources[id]); } catch (e) {}
+        }
+        delete XA.audioSources[id];
+        audioDelete(id);
+      }
+    });
+    XA.audioLocalCount = 0;
+    var a = XA.ensureAudio(); a.pause(); a.removeAttribute('src'); a.load();
+    XA._audioSrc = ''; XA.progressSec = 0;
+    XA.playing = false; XA.audioError = false;
+    XA.closeModal(); XA.updatePlayer();
+    XA.toast('已清除导入的音频', 'info');
   },
   'music-source-set': function (el) {
     var source = (el && el.dataset.source) || 'local';

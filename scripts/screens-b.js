@@ -12,13 +12,13 @@ XA_SCREENS.entertainment = `
 
   <div class="player-card glass">
     <div class="player-top"><span class="playing-tag">${ic('music')} <span data-i18n="musicPlaying">正在播放 · 后台播放</span></span><span class="hires">HI-RES</span></div>
-    <button class="source-row" data-action="music-source"><span>${ic('music')} <b data-i18n="musicSource">音源</b></span><span id="musicSourceLabel" data-i18n="sourceLocal">安星本地歌单</span>${ic('chevron')}</button>
+    <button class="source-row" data-action="music-source"><span>${ic('music')} <b data-i18n="musicSource">音源</b></span><span id="musicSourceLabel">导入音频以直接播放</span>${ic('chevron')}</button>
     <div class="track-row">
-      <div class="track-info"><h3 id="trackTitle">夜航</h3><small id="trackArtist">安星电台 · 夜行歌单</small><em id="trackSubtitle">给独行路上的一点温柔</em><div class="lyric-marquee"><span id="trackLyric">路灯把影子拉得很长，风吹散一整天的慌张 · 跟着节拍慢慢走</span></div></div>
-      <div class="vinyl cover-night" id="vinyl"><span><b>夜航</b><small>安星电台</small></span></div>
+      <div class="track-info"><h3 id="trackTitle">果宝特攻DJ(管弦版)</h3><small id="trackArtist">汽水音乐 · 完整歌曲</small><em id="trackSubtitle">导入音频后点播放即出声</em><div class="lyric-marquee"><span id="trackLyric">《果宝特攻DJ(管弦版)》待导入音频 · 在「音源」导入后点播放即出声</span></div></div>
+      <div class="vinyl cover-fruity" id="vinyl"><span><b>果宝DJ</b><small>伴行歌单</small></span></div>
     </div>
-    <div class="progress"><span id="trackProgress" style="width:32%"></span></div>
-    <div class="progress-time"><span id="trackCurrent">1:42</span><span id="trackDuration">6:12</span></div>
+    <div class="progress"><span id="trackProgress" style="width:0%"></span></div>
+    <div class="progress-time"><span id="trackCurrent">0:00</span><span id="trackDuration">--:--</span></div>
     <div class="player-controls">
       <button data-action="prev">${ic('prev')}</button>
       <button class="play-btn" data-action="play">${ic('play')}</button>
@@ -49,7 +49,7 @@ XA_SCREENS.entertainment = `
   <button class="fanqie-add" data-action="fanqie-add">${ic('plus')}<span data-i18n="fanqieAdd">同步我的书架</span>${ic('chevron')}</button>
 
   <div class="playlists">
-    <button class="playlist p1 active" data-playlist-card="night" data-action="open-playlist" data-playlist="night"><span>${ic('music')}</span><b data-i18n="playlistNight">夜行歌单</b><small>3 首 · 陪你走完这段路</small>${ic('chevron')}</button>
+    <button class="playlist p1 active" data-playlist-card="night" data-action="open-playlist" data-playlist="night"><span>${ic('music')}</span><b data-i18n="playlistNight">伴行歌单</b><small>3 首 · 果宝特攻 / 熊出没 / 军歌</small>${ic('chevron')}</button>
     <button class="playlist p2" data-playlist-card="rain" data-action="open-playlist" data-playlist="rain"><span>${ic('glasses')}</span><b data-i18n="playlistRain">雨夜白噪音</b><small>白噪音歌单 · 2 段环境声</small>${ic('chevron')}</button>
   </div>
 </section>`;
