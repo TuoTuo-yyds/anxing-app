@@ -840,16 +840,8 @@
       event: Math.max(0, Math.round((100 - safety) / 14))
     };
   }
-  function syntheticRoutes(dest) {
-    var s = geoStart, d = [dest.lat, dest.lng];
-    var mid = function (t, off) { return [s[0] + (d[0] - s[0]) * t + off, s[1] + (d[1] - s[1]) * t - off]; };
-    var base = [[s[0], s[1]], mid(.3, .0012), mid(.6, -.0008), [d[0], d[1]]];
-    return [
-      { coords: base, distance: 1200, seconds: 1080, safety: 92, time: 18, dist: '1.2', lamp: 86, cam: 12, event: 2 },
-      { coords: [base[0], mid(.3, -.0016), mid(.65, .0014), base[3]], distance: 1400, seconds: 1320, safety: 78, time: 22, dist: '1.4', lamp: 61, cam: 8, event: 4 },
-      { coords: [base[0], mid(.4, -.0026), mid(.7, .0022), base[3]], distance: 1100, seconds: 900, safety: 64, time: 15, dist: '1.1', lamp: 43, cam: 5, event: 7 }
-    ];
-  }
+  /* 不再生成任何合成的假折线：所有备选路线都来自真实路网服务，
+     服务不可用时明确报错，绝不用编造路线冒充真实选择。 */
   /* 路线专用图层：z-index 620，高于瓦片/overlayPane(400) 与容器装饰遮罩(401)，
      确保真实引导线不会被压在下面或反色。 */
   function routePane(m) {
@@ -921,11 +913,35 @@
       });
     });
   }
+  /* 从真实转向步骤里提取主要道路名作为路线标题，不再用写死的演示路名 */
+  function routeName(r, i) {
+    var roads = [];
+    (r.steps || []).forEach(function (s) {
+      /* 高德步行 API 的 road 字段偶尔是数组，统一转成字符串 */
+      var raw = s.road;
+      if (Array.isArray(raw)) raw = raw.filter(Boolean).join('');
+      var n = String(raw == null ? '' : raw).trim();
+      /* 过滤占位词，标题只呈现真实路名 */
+      if (n && n !== '当前道路' && n !== '无名道路' && roads.indexOf(n) < 0) roads.push(n);
+    });
+    if (!roads.length) return '真实步行路线 ' + ['A','B','C'][i];
+    return roads.slice(0, 2).join(' · ') + (roads.length > 2 ? ' 等' : '');
+  }
   function updateRouteCards() {
     var letters = ['A', 'B', 'C'];
-    curRoutes.forEach(function (r, i) {
-      var card = XA.$('.route-card[data-route="' + letters[i] + '"]');
-      if (!card) return;
+    XA.$$('.route-card').forEach(function (card) {
+      var i = letters.indexOf(card.dataset.route);
+      var r = curRoutes[i];
+      /* 只有 2 条真实路线时隐藏第 3 张卡片，不残留写死的演示数据 */
+      card.style.display = r ? '' : 'none';
+      if (!r) return;
+      card.classList.toggle('selected', card.dataset.route === (XA.route || 'A'));
+      var title = card.querySelector('.route-info > b');
+      if (title) {
+        var em = title.querySelector('em');
+        title.textContent = routeName(r, i);
+        if (i === 0 && em) title.appendChild(em);   // 保留「推荐」标记
+      }
       var meta = card.querySelector('.route-meta');
       if (meta) meta.innerHTML = ic('clock') + r.time + ' 分钟 <i>·</i> ' + r.dist + ' km <i>·</i> 步行';
       var tags = card.querySelector('.route-tags');
@@ -938,8 +954,9 @@
       }
     });
     var idx = XA.route === 'B' ? 1 : XA.route === 'C' ? 2 : 0;
+    var active = curRoutes[idx] || curRoutes[0];
     var eta = XA.$('#routeEta');
-    if (eta && curRoutes[idx]) eta.textContent = '路线 ' + (XA.route || 'A') + ' · 预计 ' + curRoutes[idx].time + ' 分钟';
+    if (eta && active) eta.textContent = '路线 ' + (XA.route || 'A') + ' · 预计 ' + active.time + ' 分钟 · ' + active.dist + ' km';
     var rbt = XA.$('#routeBtnText');
     if (rbt) rbt.textContent = '开始导航';
     var rm = XA.$('.rm-time');
@@ -979,49 +996,105 @@
     destPoint = dest;
     return planRoutesWithDest(start, dest);
   }
-  function planRoutesWithDest(start, dest) {
-    /* 已配置高德 Key：先取官方真实步行道路折线（国内道路网，米级精确） */
-    if (XA.Geo && XA.Geo.hasKey()) {
-      XA.toast('正在规划真实步行路线…');
-      return XA.Geo.walking({ lat: start[0], lng: start[1] }, { lat: dest.lat, lng: dest.lng })
-        .then(function (real) {
-          if (!real || !real.coords || real.coords.length < 2) throw new Error('no real route');
-          var km = real.distance / 1000, min = Math.ceil(real.duration / 60);
-          var base = { coords: real.coords, distance: real.distance, seconds: real.duration,
-                       safety: 92, time: min, dist: km.toFixed(1), lamp: 88, cam: 12, event: 2, real: true };
-          /* 备选路线沿用同一真实起终点，仅作展示对比；主路线是货真价实的道路折线 */
-          var s = geoStart, d = [dest.lat, dest.lng];
-          var mid = function (t, off) { return [s[0]+(d[0]-s[0])*t+off, s[1]+(d[1]-s[1])*t-off]; };
-          curRoutes = [base,
-            Object.assign({}, base, { coords: [real.coords[0], mid(.3,-.0016), mid(.65,.0014), real.coords[real.coords.length-1]], safety:78, time:min+4, dist:(km+.3).toFixed(1), lamp:61, cam:8, event:4 }),
-            Object.assign({}, base, { coords: [real.coords[0], mid(.4,-.0026), mid(.7,.0022), real.coords[real.coords.length-1]], safety:64, time:min+2, dist:(km-.1).toFixed(1), lamp:43, cam:5, event:7 })];
-          base.steps = real.steps || [];
-          XA.realNavSteps = (real.steps || []).slice(0, 12);
-          sortByPref(); updateRouteCards(); syncPanel();
-          redrawAllMaps();
-          XA.toast('已生成真实步行路线 · ' + km.toFixed(1) + ' km / 约 ' + min + ' 分钟');
-        })
-        .catch(function () { return planRoutesOSRM(start, dest); });
+  /* ---------- 多条真实步行路线 ----------
+     A：高德官方步行路径（国内道路网，带中文转向步骤）
+     B / C：OSM 步行路网返回的真实备选道路（同样带真实转向步骤）
+     三条都是真实路网折线，起终点完全一致。绝不再用中点"掰"出假路线。 */
+  function toRealRoute(raw, idx, start, dest) {
+    var coords = (raw.coords || []).map(function (c) { return [c[0], c[1]]; });
+    if (coords.length < 2) return null;
+    /* 不同服务把起终点吸附到道路时会有几米偏差，强制对齐，
+       保证三条路线从同一点出发、汇到同一个终点（与真实地图软件一致）。 */
+    coords[0] = [start[0], start[1]];
+    coords[coords.length - 1] = [dest.lat, dest.lng];
+    var distM = Number(raw.distance) || 0, sec = Number(raw.duration) || 0;
+    if (!distM || !sec) return null;
+    var km = distM / 1000, min = Math.ceil(sec / 60);
+    /* 绕行系数 = 真实路线长度 / 起终点直线距离。
+       这是与折线点密度无关的真实几何量（高德 56 点、OSRM 10 点也能公平比较），
+       三条路线天然不同，评分差异来自路线本身而非写死的索引扣减。 */
+    var dx = (dest.lng - start[1]) * 94000, dy = (dest.lat - start[0]) * 111000;
+    var directM = Math.sqrt(dx*dx + dy*dy) || 1;
+    var detour = Math.max(1, distM / directM);
+    var turnCount = 0;
+    for (var i = 2; i < coords.length; i++) {
+      var a = coords[i-2], b = coords[i-1], c = coords[i];
+      var v1 = [b[1]-a[1], b[0]-a[0]], v2 = [c[1]-b[1], c[0]-b[0]];
+      var l1 = Math.sqrt(v1[0]*v1[0]+v1[1]*v1[1]), l2 = Math.sqrt(v2[0]*v2[0]+v2[1]*v2[1]);
+      if (l1 > 1 && l2 > 1) {
+        var cos = (v1[0]*v2[0] + v1[1]*v2[1]) / (l1*l2);
+        if (cos < 0.7) turnCount++;   // 转角 > 45°
+      }
     }
-    return planRoutesOSRM(start, dest);
+    /* 绕行越多、转弯越多、路程越长 → 夜间安全分越低 */
+    var penalty = (detour - 1) * 16 + turnCount * 1.6 + Math.max(0, km - 1.5) * 3;
+    var safety = Math.max(30, Math.min(96, Math.round(94 - penalty)));
+    return {
+      coords: coords, distance: distM, seconds: sec, safety: safety,
+      time: min, dist: km.toFixed(1), detour: detour, turns: turnCount,
+      lamp: Math.max(40, Math.min(100, Math.round(94 - penalty * 1.5))),
+      cam: Math.max(1, Math.round(14 - penalty * 0.4)),
+      event: Math.max(0, Math.round(penalty / 4)),
+      steps: (raw.steps || []).slice(0, 12), real: true, source: raw.source || 'amap'
+    };
+  }
+  /* 用中点距离判断两条路线是否为不同走法，避免把重复路线当成"备选" */
+  function routeMid(c) { return c[Math.floor(c.length / 2)] || c[0]; }
+  function routeDistinct(a, b) {
+    var ma = routeMid(a.coords), mb = routeMid(b.coords);
+    var dx = (ma[1] - mb[1]) * 94000, dy = (ma[0] - mb[0]) * 111000;
+    return Math.sqrt(dx*dx + dy*dy) > 60;
+  }
+  /* 切换路线时同步该路线自己的真实转向步骤 */
+  XA.syncNavSteps = function () {
+    var idx = XA.route === 'B' ? 1 : XA.route === 'C' ? 2 : 0;
+    var r = curRoutes[idx] || curRoutes[0];
+    XA.realNavSteps = (r && r.steps) ? r.steps.slice(0, 12) : [];
+  };
+  function planRoutesWithDest(start, dest) {
+    var origin = { lat: start[0], lng: start[1] }, end = { lat: dest.lat, lng: dest.lng };
+    var amap = (XA.Geo && XA.Geo.hasKey())
+      ? XA.Geo.walking(origin, end).catch(function () { return null; })
+      : Promise.resolve(null);
+    var alts = (XA.Geo && XA.Geo.walkingAlternatives)
+      ? XA.Geo.walkingAlternatives(origin, end).catch(function () { return []; })
+      : Promise.resolve([]);
+    XA.toast('正在规划 2~3 条真实步行路线…');
+    return Promise.all([amap, alts]).then(function (res) {
+      var raw = [];
+      if (res[0]) raw.push(res[0]);
+      (res[1] || []).forEach(function (r) { raw.push(r); });
+      var routes = [];
+      raw.forEach(function (r) {
+        if (routes.length >= 3) return;
+        var rt = toRealRoute(r, routes.length, start, dest);
+        if (!rt) return;
+        if (routes.some(function (x) { return !routeDistinct(x, rt); })) return;
+        routes.push(rt);
+      });
+      if (!routes.length) throw new Error('no real route');
+      curRoutes = routes;
+      sortByPref(); updateRouteCards(); syncPanel();
+      XA.syncNavSteps();
+      redrawAllMaps();
+      XA.toast('已生成 ' + routes.length + ' 条真实路线 · 按' + prefName() + '排序');
+    }).catch(function () { return planRoutesOSRM(start, dest); });
   }
   function planRoutesOSRM(start, dest) {
+    /* 兜底同样只用真实路网：OSRM 公开服务（车行路网，仍沿真实道路） */
     var url = OSRM + 'driving/' + start[1] + ',' + start[0] + ';' + dest.lng + ',' + dest.lat +
       '?overview=full&geometries=geojson&alternatives=true&steps=false';
-    XA.toast('正在规划夜行安全路线…');
     return fetch(url).then(function (res) { return res.json(); }).then(function (data) {
       if (data.code !== 'Ok' || !data.routes || !data.routes.length) throw new Error('no route');
       curRoutes = data.routes.slice(0, 3).map(assessRoute);
-      sortByPref();
-      updateRouteCards(); syncPanel();
+      curRoutes.forEach(function (r) { r.steps = []; r.real = true; });
+      sortByPref(); updateRouteCards(); syncPanel();
+      XA.syncNavSteps();
       redrawAllMaps();
-      XA.toast('已生成 3 条真实路线 · 按' + prefName() + '排序');
+      XA.toast('已生成 ' + curRoutes.length + ' 条真实路线 · 按' + prefName() + '排序');
     }).catch(function () {
-      curRoutes = syntheticRoutes(dest);
-      sortByPref();
-      updateRouteCards(); syncPanel();
-      redrawAllMaps();   // 兜底路线也必须补画导航页，否则又会"没有引导线"
-      XA.toast('路线服务暂不可用，已切换到演示路线');
+      /* 服务全部不可用时明确报错，绝不再生成编造的演示折线冒充真实路线 */
+      XA.toast('路线服务暂不可用 · 请检查网络后重试', 'warn');
     });
   }
 
@@ -1369,7 +1442,18 @@
     }, 60);
   };
   var origSelect = XA.selectRoute;
-  XA.selectRoute = function (l) { origSelect(l); highlightRoute(); };
+  XA.selectRoute = function (l) {
+    origSelect(l);
+    highlightRoute();
+    /* 选中哪条路线，导航就用哪条的真实转向步骤与真实时间，不再沿用 A 的 */
+    if (XA.syncNavSteps) XA.syncNavSteps();
+    var idx = l === 'B' ? 1 : l === 'C' ? 2 : 0;
+    var r = curRoutes[idx] || curRoutes[0];
+    if (r) {
+      var eta = XA.$('#routeEta');
+      if (eta) eta.textContent = '路线 ' + l + ' · 预计 ' + r.time + ' 分钟 · ' + r.dist + ' km';
+    }
+  };
   var origStart = XA.actions['start-nav'];
   var origArStart = XA.actions['start-ar-nav'];
   function redrawAllMaps() {

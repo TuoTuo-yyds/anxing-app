@@ -502,7 +502,10 @@ XA.startNavigation = function (mode) {
   var real = XA.realNavSteps || [];
   var steps = real.length ? real.map(function (s) {
     var txt = String(s.instruction || '').replace(/<[^>]+>/g, '').trim();
-    var road = String(s.road || '').trim();
+    /* 高德 road 字段偶尔是数组，统一转成字符串 */
+    var rawRoad = s.road;
+    if (Array.isArray(rawRoad)) rawRoad = rawRoad.filter(Boolean).join('');
+    var road = String(rawRoad == null ? '' : rawRoad).trim();
     var d = Number(s.distance) || 0;
     return {
       title: txt || ('沿' + (road || '当前道路') + '前行'),

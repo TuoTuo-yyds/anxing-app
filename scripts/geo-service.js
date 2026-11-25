@@ -227,11 +227,81 @@
     });
   }
 
+  /* ---------------- 多条真实步行备选路线 ----------------
+     高德步行 API 只返回 1 条路径，无法提供"第二条、第三条真实路线"。
+     这里用 OSM 步行路网服务（foot profile）取 2 条沿真实道路的备选路线，
+     与高德主路线组成 3 个真实选择；每条都带真实转向步骤。
+     返回坐标统一 WGS84，格式为 [lat, lng]，与主路线一致。 */
+  var OSRM_FOOT = 'https://routing.openstreetmap.de/routed-foot/route/v1/driving/';
+  function actionText(s) {
+    var mod = ((s && s.maneuver) || {}).modifier || '';
+    if (mod.indexOf('left') >= 0) return '左转';
+    if (mod.indexOf('right') >= 0) return '右转';
+    return '直行';
+  }
+  function roadOf(s) {
+    var n = s && s.name;
+    if (Array.isArray(n)) n = n.filter(Boolean).join('');
+    return String(n == null ? '' : n).trim() || '当前道路';
+  }
+  function turnText(s) {
+    var mv = (s && s.maneuver) || {}, type = mv.type || '', mod = mv.modifier || '';
+    var road = roadOf(s);
+    var dir = mod.indexOf('left') >= 0 ? '左转' : mod.indexOf('right') >= 0 ? '右转' : '';
+    if (type === 'depart') return '从当前位置出发 · 沿' + road + '步行';
+    if (type === 'arrive') return '到达目的地附近';
+    if (type === 'new name') return '继续沿' + road + '前行';
+    if (dir) return dir + '进入' + road;
+    return '沿' + road + '前行';
+  }
+  function parseRoute(rt) {
+    var coords = ((rt.geometry && rt.geometry.coordinates) || []).map(function (c) { return [c[1], c[0]]; });
+    var steps = [];
+    (rt.legs || []).forEach(function (leg) {
+      (leg.steps || []).forEach(function (s) {
+        steps.push({ instruction: turnText(s), road: roadOf(s),
+                     distance: Number(s.distance) || 0, duration: Number(s.duration) || 0,
+                     action: actionText(s) });
+      });
+    });
+    return { coords: coords, distance: Number(rt.distance) || 0,
+             duration: Number(rt.duration) || 0, steps: steps, source: 'osrm-foot' };
+  }
+  function routesFrom(d) {
+    if (d.code !== 'Ok' || !d.routes || !d.routes.length) return [];
+    return d.routes.map(parseRoute).filter(function (r) { return r.coords.length > 1 && r.distance > 0; });
+  }
+  function fetchOSRM(coordsStr, extra) {
+    return fetch(OSRM_FOOT + coordsStr +
+      '?overview=full&geometries=geojson&steps=true' + (extra || ''), { mode: 'cors' })
+      .then(function (r) { return r.json(); }).then(routesFrom).catch(function () { return []; });
+  }
+  function walkingAlternatives(origin, dest) {
+    var pair = origin.lng.toFixed(6) + ',' + origin.lat.toFixed(6) + ';' +
+               dest.lng.toFixed(6) + ',' + dest.lat.toFixed(6);
+    return fetchOSRM(pair, '&alternatives=true').then(function (list) {
+      if (list.length >= 2) return list;
+      /* 少数起终点只返回 1 条备选：用连线侧方的途经点强制生成另一条真实绕行路线
+         （仍沿真实道路，OSRM 会自动吸附到最近路网，不会画出凭空直线）。 */
+      var mLat = (origin.lat + dest.lat) / 2, mLng = (origin.lng + dest.lng) / 2;
+      var dLat = dest.lat - origin.lat, dLng = dest.lng - origin.lng;
+      var len = Math.sqrt(dLat*dLat + dLng*dLng) || 0.001;
+      var off = Math.min(0.004, Math.max(0.0015, len * 0.35));
+      var vLat = mLat + dLng / len * off, vLng = mLng - dLat / len * off;
+      var via = origin.lng.toFixed(6) + ',' + origin.lat.toFixed(6) + ';' +
+                vLng.toFixed(6) + ',' + vLat.toFixed(6) + ';' +
+                dest.lng.toFixed(6) + ',' + dest.lat.toFixed(6);
+      return fetchOSRM(via).then(function (extra) {
+        return list.concat(extra).slice(0, 2);
+      });
+    });
+  }
+
   A.Geo = {
     key: getKey(), getKey: getKey, setKey: setKey, clearOverride: clearOverride,
     isBuiltin: isBuiltin, hasKey: hasKey,
     wgs84ToGcj02: wgs84ToGcj02, gcj02ToWgs84: gcj02ToWgs84, haversine: haversine,
     search: search, around: around, suggest: suggest, geocode: geocode,
-    regeo: regeo, walking: walking, ipCity: ipCity
+    regeo: regeo, walking: walking, walkingAlternatives: walkingAlternatives, ipCity: ipCity
   };
 })();
